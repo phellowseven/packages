@@ -4,6 +4,8 @@
 
 package io.flutter.plugins.googlemaps;
 
+import android.content.res.AssetManager;
+import androidx.annotation.NonNull;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -21,45 +23,49 @@ class MarkersController {
   private final MethodChannel methodChannel;
   private MarkerManager.Collection markerCollection;
   private final ClusterManagersController clusterManagersController;
+  private final AssetManager assetManager;
+  private final float density;
 
   MarkersController(
-      MethodChannel methodChannel, ClusterManagersController clusterManagersController) {
+      MethodChannel methodChannel,
+      ClusterManagersController clusterManagersController,
+      AssetManager assetManager,
+      float density) {
     this.markerIdToMarkerBuilder = new HashMap<>();
     this.markerIdToController = new HashMap<>();
     this.googleMapsMarkerIdToDartMarkerId = new HashMap<>();
     this.methodChannel = methodChannel;
     this.clusterManagersController = clusterManagersController;
+    this.assetManager = assetManager;
+    this.density = density;
   }
 
   void setCollection(MarkerManager.Collection markerCollection) {
     this.markerCollection = markerCollection;
   }
 
-  void addMarkers(List<Object> markersToAdd) {
+  void addJsonMarkers(List<Object> markersToAdd) {
     if (markersToAdd != null) {
       for (Object markerToAdd : markersToAdd) {
-        addMarker(markerToAdd);
+        addJsonMarker(markerToAdd);
       }
     }
   }
 
-  void changeMarkers(List<Object> markersToChange) {
-    if (markersToChange != null) {
-      for (Object markerToChange : markersToChange) {
-        changeMarker(markerToChange);
-      }
+  void addMarkers(@NonNull List<Messages.PlatformMarker> markersToAdd) {
+    for (Messages.PlatformMarker markerToAdd : markersToAdd) {
+      addJsonMarker(markerToAdd.getJson());
     }
   }
 
-  void removeMarkers(List<Object> markerIdsToRemove) {
-    if (markerIdsToRemove == null) {
-      return;
+  void changeMarkers(@NonNull List<Messages.PlatformMarker> markersToChange) {
+    for (Messages.PlatformMarker markerToChange : markersToChange) {
+      changeJsonMarker(markerToChange.getJson());
     }
-    for (Object rawMarkerId : markerIdsToRemove) {
-      if (rawMarkerId == null) {
-        continue;
-      }
-      String markerId = (String) rawMarkerId;
+  }
+
+  void removeMarkers(@NonNull List<String> markerIdsToRemove) {
+    for (String markerId : markerIdsToRemove) {
       removeMarker(markerId);
     }
   }
@@ -84,33 +90,31 @@ class MarkersController {
     }
   }
 
-  void showMarkerInfoWindow(String markerId, MethodChannel.Result result) {
+  void showMarkerInfoWindow(String markerId) {
     MarkerController markerController = markerIdToController.get(markerId);
-    if (markerController != null) {
-      markerController.showInfoWindow();
-      result.success(null);
-    } else {
-      result.error("Invalid markerId", "showInfoWindow called with invalid markerId", null);
+    if (markerController == null) {
+      throw new Messages.FlutterError(
+          "Invalid markerId", "showInfoWindow called with invalid markerId", null);
     }
+    markerController.showInfoWindow();
   }
 
-  void hideMarkerInfoWindow(String markerId, MethodChannel.Result result) {
+  void hideMarkerInfoWindow(String markerId) {
     MarkerController markerController = markerIdToController.get(markerId);
-    if (markerController != null) {
-      markerController.hideInfoWindow();
-      result.success(null);
-    } else {
-      result.error("Invalid markerId", "hideInfoWindow called with invalid markerId", null);
+    if (markerController == null) {
+      throw new Messages.FlutterError(
+          "Invalid markerId", "hideInfoWindow called with invalid markerId", null);
     }
+    markerController.hideInfoWindow();
   }
 
-  void isInfoWindowShown(String markerId, MethodChannel.Result result) {
+  boolean isInfoWindowShown(String markerId) {
     MarkerController markerController = markerIdToController.get(markerId);
-    if (markerController != null) {
-      result.success(markerController.isInfoWindowShown());
-    } else {
-      result.error("Invalid markerId", "isInfoWindowShown called with invalid markerId", null);
+    if (markerController == null) {
+      throw new Messages.FlutterError(
+          "Invalid markerId", "isInfoWindowShown called with invalid markerId", null);
     }
+    return markerController.isInfoWindowShown();
   }
 
   boolean onMapsMarkerTap(String googleMarkerId) {
@@ -182,7 +186,7 @@ class MarkersController {
     }
   }
 
-  private void addMarker(Object marker) {
+  private void addJsonMarker(Object marker) {
     if (marker == null) {
       return;
     }
@@ -192,7 +196,7 @@ class MarkersController {
     }
     String clusterManagerId = getClusterManagerId(marker);
     MarkerBuilder markerBuilder = new MarkerBuilder(markerId, clusterManagerId);
-    Convert.interpretMarkerOptions(marker, markerBuilder);
+    Convert.interpretMarkerOptions(marker, markerBuilder, assetManager, density);
     addMarker(markerBuilder);
   }
 
@@ -228,7 +232,7 @@ class MarkersController {
     googleMapsMarkerIdToDartMarkerId.put(marker.getId(), markerId);
   }
 
-  private void changeMarker(Object marker) {
+  private void changeJsonMarker(Object marker) {
     if (marker == null) {
       return;
     }
@@ -246,17 +250,17 @@ class MarkersController {
     // be removed and re-added to update its cluster manager state.
     if (!(Objects.equals(clusterManagerId, oldClusterManagerId))) {
       removeMarker(markerId);
-      addMarker(marker);
+      addJsonMarker(marker);
       return;
     }
 
     // Update marker builder.
-    Convert.interpretMarkerOptions(marker, markerBuilder);
+    Convert.interpretMarkerOptions(marker, markerBuilder, assetManager, density);
 
     // Update existing marker on map.
     MarkerController markerController = markerIdToController.get(markerId);
     if (markerController != null) {
-      Convert.interpretMarkerOptions(marker, markerController);
+      Convert.interpretMarkerOptions(marker, markerController, assetManager, density);
     }
   }
 

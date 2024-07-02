@@ -77,6 +77,7 @@ public class GoogleMapControllerTest {
         new GoogleMapController(
             0,
             context,
+            mockMessenger,
             mockMethodChannel,
             activity::getLifecycle,
             null,
@@ -202,7 +203,7 @@ public class GoogleMapControllerTest {
     googleMapController.onMapReady(mockGoogleMap);
 
     // Verify if the ClusterManagersController.addClusterManagers method is called with initial cluster managers.
-    verify(mockClusterManagersController, times(1)).addClusterManagers(any());
+    verify(mockClusterManagersController, times(1)).addJsonClusterManagers(any());
   }
 
   @Test
