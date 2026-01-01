@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ class MockPrimitiveHostApi: PrimitiveHostApi {
   func aBool(value: Bool) -> Bool { value }
   func aString(value: String) -> String { value }
   func aDouble(value: Double) -> Double { value }
-  func aMap(value: [AnyHashable: Any?]) -> [AnyHashable: Any?] { value }
+  func aMap(value: [AnyHashable?: Any?]) -> [AnyHashable?: Any?] { value }
   func aList(value: [Any?]) -> [Any?] { value }
   func anInt32List(value: FlutterStandardTypedData) -> FlutterStandardTypedData { value }
   func aBoolList(value: [Bool?]) -> [Bool?] { value }

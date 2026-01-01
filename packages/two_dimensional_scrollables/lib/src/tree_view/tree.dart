@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,9 +34,9 @@ class TreeViewNode<T> {
     T content, {
     List<TreeViewNode<T>>? children,
     bool expanded = false,
-  })  : _expanded = children != null && children.isNotEmpty && expanded,
-        _content = content,
-        _children = children ?? <TreeViewNode<T>>[];
+  }) : _expanded = children != null && children.isNotEmpty && expanded,
+       _content = content,
+       _children = children ?? <TreeViewNode<T>>[];
 
   /// The subject matter of the node.
   ///
@@ -219,8 +219,8 @@ class TreeViewController {
   /// add a [Builder] widget, which provides a new scope with a
   /// [BuildContext] that is "under" the [TreeView].
   static TreeViewController of(BuildContext context) {
-    final _TreeViewState<Object?>? result =
-        context.findAncestorStateOfType<_TreeViewState<Object?>>();
+    final _TreeViewState<Object?>? result = context
+        .findAncestorStateOfType<_TreeViewState<Object?>>();
     if (result != null) {
       return result.controller;
     }
@@ -322,8 +322,10 @@ class TreeView<T> extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
-  }) : assert(verticalDetails.direction == AxisDirection.down &&
-            horizontalDetails.direction == AxisDirection.right);
+  }) : assert(
+         verticalDetails.direction == AxisDirection.down &&
+             horizontalDetails.direction == AxisDirection.right,
+       );
 
   /// The list of [TreeViewNode]s that may be displayed in the [TreeView].
   ///
@@ -496,6 +498,7 @@ class TreeView<T> extends StatefulWidget {
 
   /// The default [AnimationStyle] used for node expand and collapse animations,
   /// when one has not been provided in [toggleAnimationStyle].
+  // ignore: prefer_const_constructors
   static AnimationStyle defaultToggleAnimationStyle = AnimationStyle(
     curve: defaultAnimationCurve,
     duration: defaultAnimationDuration,
@@ -526,15 +529,17 @@ class TreeView<T> extends StatefulWidget {
     required TreeViewNode<Object?> node,
     required Widget child,
   }) {
-    return Builder(builder: (BuildContext context) {
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          TreeViewController.of(context).toggleNode(node);
-        },
-        child: child,
-      );
-    });
+    return Builder(
+      builder: (BuildContext context) {
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            TreeViewController.of(context).toggleNode(node);
+          },
+          child: child,
+        );
+      },
+    );
   }
 
   /// Returns the fixed height, default [TreeRow] for rows in the tree,
@@ -542,9 +547,7 @@ class TreeView<T> extends StatefulWidget {
   ///
   /// Used by [TreeView.treeRowBuilder].
   static TreeRow defaultTreeRowBuilder(TreeViewNode<Object?> node) {
-    return const TreeRow(
-      extent: FixedTreeRowExtent(_kDefaultRowExtent),
-    );
+    return const TreeRow(extent: FixedTreeRowExtent(_kDefaultRowExtent));
   }
 
   /// Default builder for the widget representing a given [TreeViewNode] in the
@@ -569,29 +572,31 @@ class TreeView<T> extends StatefulWidget {
     final int index = TreeViewController.of(context).getActiveIndexFor(node)!;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(children: <Widget>[
-        // Icon for parent nodes
-        TreeView.wrapChildToToggleNode(
-          node: node,
-          child: SizedBox.square(
-            dimension: 30.0,
-            child: node.children.isNotEmpty
-                ? AnimatedRotation(
-                    key: ValueKey<int>(index),
-                    turns: node.isExpanded ? 0.25 : 0.0,
-                    duration: animationDuration,
-                    curve: animationCurve,
-                    // Renders a unicode right-facing arrow. >
-                    child: const Icon(IconData(0x25BA), size: 14),
-                  )
-                : null,
+      child: Row(
+        children: <Widget>[
+          // Icon for parent nodes
+          TreeView.wrapChildToToggleNode(
+            node: node,
+            child: SizedBox.square(
+              dimension: 30.0,
+              child: node.children.isNotEmpty
+                  ? AnimatedRotation(
+                      key: ValueKey<int>(index),
+                      turns: node.isExpanded ? 0.25 : 0.0,
+                      duration: animationDuration,
+                      curve: animationCurve,
+                      // Renders a unicode right-facing arrow. >
+                      child: const Icon(IconData(0x25BA), size: 14),
+                    )
+                  : null,
+            ),
           ),
-        ),
-        // Spacer
-        const SizedBox(width: 8.0),
-        // Content
-        Text(node.content.toString()),
-      ]),
+          // Spacer
+          const SizedBox(width: 8.0),
+          // Content
+          Text(node.content.toString()),
+        ],
+      ),
     );
   }
 
@@ -769,8 +774,8 @@ class _TreeViewState<T> extends State<TreeView<T>>
   @override
   TreeViewNode<T>? getNodeFor(T content) => _getNode(content, widget.tree);
   TreeViewNode<T>? _getNode(T content, List<TreeViewNode<T>> tree) {
-    final List<TreeViewNode<T>> nextDepth = <TreeViewNode<T>>[];
-    for (final TreeViewNode<T> node in tree) {
+    final nextDepth = <TreeViewNode<T>>[];
+    for (final node in tree) {
       if (node.content == content) {
         return node;
       }
@@ -794,7 +799,7 @@ class _TreeViewState<T> extends State<TreeView<T>>
 
   @override
   void expandAll() {
-    final List<TreeViewNode<T>> activeNodesToExpand = <TreeViewNode<T>>[];
+    final activeNodesToExpand = <TreeViewNode<T>>[];
     _expandAll(widget.tree, activeNodesToExpand);
     activeNodesToExpand.reversed.forEach(toggleNode);
   }
@@ -803,7 +808,7 @@ class _TreeViewState<T> extends State<TreeView<T>>
     List<TreeViewNode<T>> tree,
     List<TreeViewNode<T>> activeNodesToExpand,
   ) {
-    for (final TreeViewNode<T> node in tree) {
+    for (final node in tree) {
       if (node.children.isNotEmpty) {
         // This is a parent node.
         // Expand all the children, and their children.
@@ -826,7 +831,7 @@ class _TreeViewState<T> extends State<TreeView<T>>
 
   @override
   void collapseAll() {
-    final List<TreeViewNode<T>> activeNodesToCollapse = <TreeViewNode<T>>[];
+    final activeNodesToCollapse = <TreeViewNode<T>>[];
     _collapseAll(widget.tree, activeNodesToCollapse);
     activeNodesToCollapse.reversed.forEach(toggleNode);
   }
@@ -835,7 +840,7 @@ class _TreeViewState<T> extends State<TreeView<T>>
     List<TreeViewNode<T>> tree,
     List<TreeViewNode<T>> activeNodesToCollapse,
   ) {
-    for (final TreeViewNode<T> node in tree) {
+    for (final node in tree) {
       if (node.children.isNotEmpty) {
         // This is a parent node.
         // Collapse all the children, and their children.
@@ -886,14 +891,24 @@ class _TreeViewState<T> extends State<TreeView<T>>
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
+
+      // If animation is disabled or duration is zero, skip the animation
+      // and update the active nodes immediately. This ensures the tree
+      // is updated correctly when the node's children are no longer active.
+      if (widget.toggleAnimationStyle?.duration == Duration.zero) {
+        _unpackActiveNodes();
+        return;
+      }
+
       final AnimationController controller =
           _currentAnimationForParent[node]?.controller ??
-              AnimationController(
-                value: node._expanded ? 0.0 : 1.0,
-                vsync: this,
-                duration: widget.toggleAnimationStyle?.duration ??
-                    TreeView.defaultAnimationDuration,
-              );
+          AnimationController(
+            value: node._expanded ? 0.0 : 1.0,
+            vsync: this,
+            duration:
+                widget.toggleAnimationStyle?.duration ??
+                TreeView.defaultAnimationDuration,
+          );
       controller
         ..addStatusListener((AnimationStatus status) {
           switch (status) {
@@ -902,6 +917,12 @@ class _TreeViewState<T> extends State<TreeView<T>>
               _currentAnimationForParent[node]!.controller.dispose();
               _currentAnimationForParent.remove(node);
               _updateActiveAnimations();
+              // If the node is collapsing, we need to unpack the active
+              // nodes to remove the ones that were removed from the tree.
+              // This is only necessary if the node is collapsing.
+              if (!node._expanded) {
+                _unpackActiveNodes();
+              }
             case AnimationStatus.forward:
             case AnimationStatus.reverse:
           }
@@ -921,9 +942,10 @@ class _TreeViewState<T> extends State<TreeView<T>>
         case AnimationStatus.completed:
       }
 
-      final CurvedAnimation newAnimation = CurvedAnimation(
+      final newAnimation = CurvedAnimation(
         parent: controller,
-        curve: widget.toggleAnimationStyle?.curve ??
+        curve:
+            widget.toggleAnimationStyle?.curve ??
             TreeView.defaultAnimationCurve,
       );
       _currentAnimationForParent[node] = (
@@ -940,9 +962,7 @@ class _TreeViewState<T> extends State<TreeView<T>>
           controller.forward();
         case false:
           // Collapsing
-          controller.reverse().then((_) {
-            _unpackActiveNodes();
-          });
+          controller.reverse();
       }
     });
   }
@@ -966,15 +986,16 @@ class _TreeView extends TwoDimensionalScrollView {
     required this.indentation,
     required int rowCount,
     bool addAutomaticKeepAlives = true,
-  })  : assert(verticalDetails.direction == AxisDirection.down),
-        assert(horizontalDetails.direction == AxisDirection.right),
-        super(
-            delegate: TreeRowBuilderDelegate(
-          nodeBuilder: nodeBuilder,
-          rowBuilder: rowBuilder,
-          rowCount: rowCount,
-          addAutomaticKeepAlives: addAutomaticKeepAlives,
-        ));
+  }) : assert(verticalDetails.direction == AxisDirection.down),
+       assert(horizontalDetails.direction == AxisDirection.right),
+       super(
+         delegate: TreeRowBuilderDelegate(
+           nodeBuilder: nodeBuilder,
+           rowBuilder: rowBuilder,
+           rowCount: rowCount,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+         ),
+       );
 
   final Map<UniqueKey, TreeViewNodesAnimation> activeAnimations;
   final Map<int, int> rowDepths;
@@ -1018,10 +1039,12 @@ class TreeViewport extends TwoDimensionalViewport {
     required this.activeAnimations,
     required this.rowDepths,
     required this.indentation,
-  })  : assert(verticalAxisDirection == AxisDirection.down &&
-            horizontalAxisDirection == AxisDirection.right),
-        // This is fixed as there is currently only one traversal pattern, https://github.com/flutter/flutter/issues/148357
-        super(mainAxis: Axis.vertical);
+  }) : assert(
+         verticalAxisDirection == AxisDirection.down &&
+             horizontalAxisDirection == AxisDirection.right,
+       ),
+       // This is fixed as there is currently only one traversal pattern, https://github.com/flutter/flutter/issues/148357
+       super(mainAxis: Axis.vertical);
 
   /// The currently active [TreeViewNode] animations.
   ///

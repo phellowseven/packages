@@ -13,7 +13,6 @@
 # cautious about adding to this list.
 - build_verify
 - google_maps
-- win32
 
 ## Allowed by default
 
@@ -30,22 +29,35 @@
 - convert
 - crypto
 - dart_style
+- devtools_app_shared
+- devtools_extensions
 - fake_async
 - ffi
+- ffigen
+- file
+- file_testing
 - gcloud
+- graphs
 - html
 - http
 - intl
 - io
 - js
 - json_serializable
+- leak_tracker
+- leak_tracker_flutter_testing
 - lints
 - logging
 - markdown
 - meta
 - mime
+- mockito
+- objective_c
 - path
+- package_config
 - platform
+- process
+- pub_semver
 - shelf
 - shelf_static
 - source_gen
@@ -59,10 +71,10 @@
 # Google-owned packages
 - _discoveryapis_commons
 - adaptive_navigation
-- file
 - googleapis
 - googleapis_auth
 - json_annotation
+- protobuf
 - quiver
 - sanitize_html
 - source_helper

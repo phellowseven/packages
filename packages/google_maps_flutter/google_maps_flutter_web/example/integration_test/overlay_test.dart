@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,56 +34,56 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('TileOverlayController', () {
-    const TileOverlayId id = TileOverlayId('');
+    const id = TileOverlayId('');
 
     testWidgets('minimal initialization', (WidgetTester tester) async {
-      final TileOverlayController controller = TileOverlayController(
+      final controller = TileOverlayController(
         tileOverlay: const TileOverlay(tileOverlayId: id),
       );
 
-      final gmaps.Size size = controller.gmMapType.tileSize!;
-      expect(size.width, TileOverlayController.logicalTileSize);
-      expect(size.height, TileOverlayController.logicalTileSize);
+      final gmaps.Size? size = controller.gmMapType.tileSize;
+      expect(size?.width, TileOverlayController.logicalTileSize);
+      expect(size?.height, TileOverlayController.logicalTileSize);
       expect(
-        controller.gmMapType.getTile!(gmaps.Point(0, 0), 0, document),
+        controller.gmMapType.getTile(gmaps.Point(0, 0), 0, document),
         null,
       );
     });
 
     testWidgets('produces image tiles', (WidgetTester tester) async {
-      final TileOverlayController controller = TileOverlayController(
+      final controller = TileOverlayController(
         tileOverlay: const TileOverlay(
           tileOverlayId: id,
           tileProvider: TestTileProvider(),
         ),
       );
 
-      final HTMLImageElement img =
-          controller.gmMapType.getTile!(gmaps.Point(0, 0), 0, document)!
+      final img =
+          controller.gmMapType.getTile(gmaps.Point(0, 0), 0, document)!
               as HTMLImageElement;
       expect(img.naturalWidth, 0);
       expect(img.naturalHeight, 0);
-      expect(img.hidden, true);
+      expect((img.hidden! as JSBoolean).toDart, true);
 
       await img.onLoad.first;
 
       await img.decode().toDart;
 
-      expect(img.hidden, false);
+      expect((img.hidden! as JSBoolean).toDart, false);
       expect(img.naturalWidth, 16);
       expect(img.naturalHeight, 16);
     });
 
     testWidgets('update', (WidgetTester tester) async {
-      final TileOverlayController controller = TileOverlayController(
+      final controller = TileOverlayController(
         tileOverlay: const TileOverlay(
           tileOverlayId: id,
           tileProvider: NoTileProvider(),
         ),
       );
       {
-        final HTMLImageElement img =
-            controller.gmMapType.getTile!(gmaps.Point(0, 0), 0, document)!
+        final img =
+            controller.gmMapType.getTile(gmaps.Point(0, 0), 0, document)!
                 as HTMLImageElement;
         await null; // let `getTile` `then` complete
         expect(
@@ -93,13 +93,12 @@ void main() {
         );
       }
 
-      controller.update(const TileOverlay(
-        tileOverlayId: id,
-        tileProvider: TestTileProvider(),
-      ));
+      controller.update(
+        const TileOverlay(tileOverlayId: id, tileProvider: TestTileProvider()),
+      );
       {
-        final HTMLImageElement img =
-            controller.gmMapType.getTile!(gmaps.Point(0, 0), 0, document)!
+        final img =
+            controller.gmMapType.getTile(gmaps.Point(0, 0), 0, document)!
                 as HTMLImageElement;
 
         await img.onLoad.first;
@@ -114,7 +113,7 @@ void main() {
       controller.update(const TileOverlay(tileOverlayId: id));
       {
         expect(
-          controller.gmMapType.getTile!(gmaps.Point(0, 0), 0, document),
+          controller.gmMapType.getTile(gmaps.Point(0, 0), 0, document),
           null,
           reason: 'Setting a null tileProvider should work.',
         );

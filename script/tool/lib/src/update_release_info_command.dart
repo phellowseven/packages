@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,6 @@ import 'package:file/file.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-import 'common/git_version_finder.dart';
 import 'common/output_utils.dart';
 import 'common/package_looping_command.dart';
 import 'common/package_state_utils.dart';
@@ -34,33 +33,36 @@ enum _ChangelogUpdateState {
 /// A command to update the changelog, and optionally version, of packages.
 class UpdateReleaseInfoCommand extends PackageLoopingCommand {
   /// Creates a publish metadata updater command instance.
-  UpdateReleaseInfoCommand(
-    super.packagesDir, {
-    super.gitDir,
-  }) {
-    argParser.addOption(_changelogFlag,
-        mandatory: true,
-        help: 'The changelog entry to add. '
-            'Each line will be a separate list entry.');
-    argParser.addOption(_versionTypeFlag,
-        mandatory: true,
-        help: 'The version change level',
-        allowed: <String>[
-          _versionNext,
-          _versionMinimal,
-          _versionBugfix,
-          _versionMinor,
-        ],
-        allowedHelp: <String, String>{
-          _versionNext:
-              'No version change; just adds a NEXT entry to the changelog.',
-          _versionBugfix: 'Increments the bugfix version.',
-          _versionMinor: 'Increments the minor version.',
-          _versionMinimal: 'Depending on the changes to each package: '
-              'increments the bugfix version (for publishable changes), '
-              "uses NEXT (for changes that don't need to be published), "
-              'or skips (if no changes).',
-        });
+  UpdateReleaseInfoCommand(super.packagesDir, {super.gitDir}) {
+    argParser.addOption(
+      _changelogFlag,
+      mandatory: true,
+      help:
+          'The changelog entry to add. '
+          'Each line will be a separate list entry.',
+    );
+    argParser.addOption(
+      _versionTypeFlag,
+      mandatory: true,
+      help: 'The version change level',
+      allowed: <String>[
+        _versionNext,
+        _versionMinimal,
+        _versionBugfix,
+        _versionMinor,
+      ],
+      allowedHelp: <String, String>{
+        _versionNext:
+            'No version change; just adds a NEXT entry to the changelog.',
+        _versionBugfix: 'Increments the bugfix version.',
+        _versionMinor: 'Increments the minor version.',
+        _versionMinimal:
+            'Depending on the changes to each package: '
+            'increments the bugfix version (for publishable changes), '
+            "uses NEXT (for changes that don't need to be published), "
+            'or skips (if no changes).',
+      },
+    );
   }
 
   static const String _changelogFlag = 'changelog';
@@ -76,16 +78,12 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
   // If null, either there is no version change, or it is dynamic (`minimal`).
   _VersionIncrementType? _versionChange;
 
-  // The cache of changed files, for dynamic version change determination.
-  //
-  // Only set for `minimal` version change.
-  late final List<String> _changedFiles;
-
   @override
   final String name = 'update-release-info';
 
   @override
-  final String description = 'Updates CHANGELOG.md files, and optionally the '
+  final String description =
+      'Updates CHANGELOG.md files, and optionally the '
       'version in pubspec.yaml, in a way that is consistent with version-check '
       'enforcement.';
 
@@ -103,12 +101,6 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
       case _versionBugfix:
         _versionChange = _VersionIncrementType.bugfix;
       case _versionMinimal:
-        final GitVersionFinder gitVersionFinder = await retrieveVersionFinder();
-        // If the line below fails with "Not a valid object name FETCH_HEAD"
-        // run "git fetch", FETCH_HEAD is a temporary reference that only exists
-        // after a fetch. This can happen when a branch is made locally and
-        // pushed but never fetched.
-        _changedFiles = await gitVersionFinder.getChangedFiles();
         // Anothing other than a fixed change is null.
         _versionChange = null;
       case _versionNext:
@@ -128,13 +120,18 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
     // needed.
     if (versionChange == null &&
         getStringArg(_versionTypeFlag) == _versionMinimal) {
-      final Directory gitRoot =
-          packagesDir.fileSystem.directory((await gitDir).path);
-      final String relativePackagePath =
-          getRelativePosixPath(package.directory, from: gitRoot);
-      final PackageChangeState state = await checkPackageChangeState(package,
-          changedPaths: _changedFiles,
-          relativePackagePath: relativePackagePath);
+      final Directory gitRoot = packagesDir.fileSystem.directory(
+        (await gitDir).path,
+      );
+      final String relativePackagePath = getRelativePosixPath(
+        package.directory,
+        from: gitRoot,
+      );
+      final PackageChangeState state = await checkPackageChangeState(
+        package,
+        changedPaths: changedFiles,
+        relativePackagePath: relativePackagePath,
+      );
 
       if (!state.hasChanges) {
         return PackageResult.skip('No changes to package');
@@ -148,11 +145,14 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
     }
 
     if (versionChange != null) {
-      final Version? updatedVersion =
-          _updatePubspecVersion(package, versionChange);
+      final Version? updatedVersion = _updatePubspecVersion(
+        package,
+        versionChange,
+      );
       if (updatedVersion == null) {
-        return PackageResult.fail(
-            <String>['Could not determine current version.']);
+        return PackageResult.fail(<String>[
+          'Could not determine current version.',
+        ]);
       }
       nextVersionString = updatedVersion.toString();
       print('${indentation}Incremented version to $nextVersionString.');
@@ -160,8 +160,10 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
       nextVersionString = 'NEXT';
     }
 
-    final _ChangelogUpdateOutcome updateOutcome =
-        _updateChangelog(package, nextVersionString);
+    final _ChangelogUpdateOutcome updateOutcome = _updateChangelog(
+      package,
+      nextVersionString,
+    );
     switch (updateOutcome) {
       case _ChangelogUpdateOutcome.addedSection:
         print('${indentation}Added a $nextVersionString section.');
@@ -175,18 +177,20 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
   }
 
   _ChangelogUpdateOutcome _updateChangelog(
-      RepositoryPackage package, String version) {
+    RepositoryPackage package,
+    String version,
+  ) {
     if (!package.changelogFile.existsSync()) {
       printError('${indentation}Missing CHANGELOG.md.');
       return _ChangelogUpdateOutcome.failed;
     }
 
-    final String newHeader = '## $version';
-    final RegExp listItemPattern = RegExp(r'^(\s*[-*])');
+    final newHeader = '## $version';
+    final listItemPattern = RegExp(r'^(\s*[-*])');
 
-    final StringBuffer newChangelog = StringBuffer();
+    final newChangelog = StringBuffer();
     _ChangelogUpdateState state = _ChangelogUpdateState.findingFirstSection;
-    bool updatedExistingSection = false;
+    var updatedExistingSection = false;
 
     for (final String line in package.changelogFile.readAsLinesSync()) {
       switch (state) {
@@ -250,7 +254,7 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
   /// any missing periods.
   ///
   /// E.g., 'A line\nAnother line.' will become:
-  /// ```
+  /// ```none
   /// [ '* A line.', '* Another line.' ]
   /// ```
   Iterable<String> _changelogAdditionsAsList({String listMarker = '*'}) {
@@ -266,7 +270,9 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
   /// Updates the version in [package]'s pubspec according to [type], returning
   /// the new version, or null if there was an error updating the version.
   Version? _updatePubspecVersion(
-      RepositoryPackage package, _VersionIncrementType type) {
+    RepositoryPackage package,
+    _VersionIncrementType type,
+  ) {
     final Pubspec pubspec = package.parsePubspec();
     final Version? currentVersion = pubspec.version;
     if (currentVersion == null) {
@@ -283,8 +289,7 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
     final Version newVersion = _nextVersion(currentVersion, adjustedType);
 
     // Write the new version to the pubspec.
-    final YamlEditor editablePubspec =
-        YamlEditor(package.pubspecFile.readAsStringSync());
+    final editablePubspec = YamlEditor(package.pubspecFile.readAsStringSync());
     editablePubspec.update(<String>['version'], newVersion.toString());
     package.pubspecFile.writeAsStringSync(editablePubspec.toString());
 
@@ -298,10 +303,15 @@ class UpdateReleaseInfoCommand extends PackageLoopingCommand {
       case _VersionIncrementType.bugfix:
         return version.nextPatch;
       case _VersionIncrementType.build:
-        final int buildNumber =
-            version.build.isEmpty ? 0 : version.build.first as int;
-        return Version(version.major, version.minor, version.patch,
-            build: '${buildNumber + 1}');
+        final buildNumber = version.build.isEmpty
+            ? 0
+            : version.build.first as int;
+        return Version(
+          version.major,
+          version.minor,
+          version.patch,
+          build: '${buildNumber + 1}',
+        );
     }
   }
 }

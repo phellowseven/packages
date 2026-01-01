@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,5 +17,9 @@ class ViewGroupProxyApi(override val pigeonRegistrar: ProxyApiRegistrar) :
     PigeonApiViewGroup(pigeonRegistrar) {
   override fun addView(pigeon_instance: ViewGroup, view: View) {
     pigeon_instance.addView(view)
+  }
+
+  override fun removeView(pigeon_instance: ViewGroup, view: View) {
+    pigeon_instance.removeView(view)
   }
 }

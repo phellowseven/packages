@@ -1,13 +1,17 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #import <Flutter/Flutter.h>
 #import <GoogleMaps/GoogleMaps.h>
+
+#import "FGMCATransactionWrapper.h"
+#import "FGMClusterManagersController.h"
 #import "GoogleMapCircleController.h"
 #import "GoogleMapMarkerController.h"
 #import "GoogleMapPolygonController.h"
 #import "GoogleMapPolylineController.h"
+#import "messages.g.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -15,12 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FLTGoogleMapController : NSObject <GMSMapViewDelegate, FlutterPlatformView>
 - (instancetype)initWithFrame:(CGRect)frame
                viewIdentifier:(int64_t)viewId
-                    arguments:(nullable id)args
+           creationParameters:(FGMPlatformMapViewCreationParams *)creationParameters
                     registrar:(NSObject<FlutterPluginRegistrar> *)registrar;
 - (void)showAtOrigin:(CGPoint)origin;
 - (void)hide;
-- (void)animateWithCameraUpdate:(GMSCameraUpdate *)cameraUpdate;
-- (void)moveWithCameraUpdate:(GMSCameraUpdate *)cameraUpdate;
 - (nullable GMSCameraPosition *)cameraPosition;
 @end
 

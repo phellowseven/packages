@@ -1,3 +1,96 @@
+## 0.4.0+8
+
+* Bumps com.android.tools.build:gradle from 8.12.1 to 8.13.1.
+
+## 0.4.0+7
+
+* Updates to Pigeon 26.
+
+## 0.4.0+6
+
+* Updates Java compatibility version to 17 and minimum supported SDK version to Flutter 3.35/Dart 3.9.
+
+## 0.4.0+5
+
+* Resolves Gradle 9 deprecations.
+
+## 0.4.0+4
+
+* Bumps com.android.tools.build:gradle to 8.12.1.
+* Updates minimum supported SDK version to Flutter 3.29/Dart 3.7.
+
+## 0.4.0+3
+
+* Updates kotlin version to 2.2.0 to enable gradle 8.11 support.
+
+## 0.4.0+2
+
+* Adds support for setting the `offerToken` on `GooglePlayPurchaseParam`.
+
+## 0.4.0+1
+
+* Updates compileSdk 34 to flutter.compileSdkVersion.
+
+## 0.4.0
+
+* Updates Google Play Billing Library from 6.2.0 to 7.1.1.
+* **BREAKING CHANGES**:
+  * Removes the deprecated `ProrationMode` enum. `ReplacementMode` should be used instead.
+  * Removes the deprecated `BillingClientWrapper.enablePendingPurchases` method.
+  * Removes JSON serialization from Dart wrapper classes.
+  * Removes `subscriptionsOnVR` and `inAppItemsOnVR` from `BillingClientFeature`.
+* Adds `installmentPlanDetails` to `SubscriptionOfferDetailsWrapper`.
+* Adds APIs to support pending transactions for subscription prepaid plans (`PendingPurchasesParams`).
+
+## 0.3.6+13
+
+* Updates androidx.annotation:annotation to 1.9.1.
+
+## 0.3.6+12
+
+* Updates README to remove contributor-focused documentation.
+
+## 0.3.6+11
+
+* Bumps androidx.annotation:annotation from 1.8.2 to 1.9.0.
+
+## 0.3.6+10
+
+* Updates Pigeon for non-nullable collection type support.
+
+## 0.3.6+9
+
+* Updates Java compatibility version to 11.
+
+## 0.3.6+8
+
+* Removes dependency on org.jetbrains.kotlin:kotlin-bom.
+* Updates minimum supported SDK version to Flutter 3.24/Dart 3.5.
+
+## 0.3.6+7
+
+* Sets `android.buildFeatures.buildConfig` to true for compatibility with AGP 8.0+.
+
+## 0.3.6+6
+
+* Bumps androidx.annotation:annotation from 1.8.1 to 1.8.2.
+
+## 0.3.6+5
+
+* Bumps com.android.billingclient:billing from 6.1.0 to 6.2.0.
+
+## 0.3.6+4
+
+* Bumps androidx.annotation:annotation from 1.8.0 to 1.8.1.
+
+## 0.3.6+3
+
+* Updates lint checks to ignore NewerVersionAvailable.
+
+## 0.3.6+2
+
+* Updates Android Gradle Plugin to 8.5.1.
+
 ## 0.3.6+1
 
 * Updates minimum supported SDK version to Flutter 3.22/Dart 3.4.

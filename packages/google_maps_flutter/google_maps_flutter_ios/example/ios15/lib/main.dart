@@ -1,9 +1,11 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 import 'package:maps_example_dart/animate_camera.dart';
+import 'package:maps_example_dart/clustering.dart';
+import 'package:maps_example_dart/ground_overlay.dart';
 import 'package:maps_example_dart/lite_mode.dart';
 import 'package:maps_example_dart/map_click.dart';
 import 'package:maps_example_dart/map_coordinates.dart';
@@ -23,23 +25,28 @@ import 'package:maps_example_dart/snapshot.dart';
 import 'package:maps_example_dart/tile_overlay.dart';
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(
+    const MaterialApp(
       home: MapsDemo(<GoogleMapExampleAppPage>[
-    MapUiPage(),
-    MapCoordinatesPage(),
-    MapClickPage(),
-    AnimateCameraPage(),
-    MoveCameraPage(),
-    PlaceMarkerPage(),
-    MarkerIconsPage(),
-    ScrollingMapPage(),
-    PlacePolylinePage(),
-    PlacePolygonPage(),
-    PlaceCirclePage(),
-    PaddingPage(),
-    SnapshotPage(),
-    LiteModePage(),
-    TileOverlayPage(),
-    MapIdPage(),
-  ])));
+        MapUiPage(),
+        MapCoordinatesPage(),
+        MapClickPage(),
+        AnimateCameraPage(),
+        MoveCameraPage(),
+        PlaceMarkerPage(),
+        MarkerIconsPage(),
+        ScrollingMapPage(),
+        PlacePolylinePage(),
+        PlacePolygonPage(),
+        PlaceCirclePage(),
+        PaddingPage(),
+        SnapshotPage(),
+        LiteModePage(),
+        TileOverlayPage(),
+        GroundOverlayPage(),
+        ClusteringPage(),
+        MapIdPage(),
+      ]),
+    ),
+  );
 }

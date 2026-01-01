@@ -1,36 +1,40 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #import <Flutter/Flutter.h>
 #import <GoogleMaps/GoogleMaps.h>
 
+#import "messages.g.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FLTGoogleMapTileOverlayController : NSObject
-- (instancetype)initWithTileLayer:(GMSTileLayer *)tileLayer
-                          mapView:(GMSMapView *)mapView
-                          options:(NSDictionary *)optionsData;
+/// The layer managed by this controller instance.
+@property(readonly, nonatomic) GMSTileLayer *layer;
+
+- (instancetype)initWithTileOverlay:(FGMPlatformTileOverlay *)tileOverlay
+                          tileLayer:(GMSTileLayer *)tileLayer
+                            mapView:(GMSMapView *)mapView;
 - (void)removeTileOverlay;
 - (void)clearTileCache;
-- (NSDictionary *)getTileOverlayInfo;
 @end
 
 @interface FLTTileProviderController : GMSTileLayer
 @property(copy, nonatomic, readonly) NSString *tileOverlayIdentifier;
-- (instancetype)init:(FlutterMethodChannel *)methodChannel
-    withTileOverlayIdentifier:(NSString *)identifier;
+- (instancetype)initWithTileOverlayIdentifier:(NSString *)identifier
+                              callbackHandler:(FGMMapsCallbackApi *)callbackHandler;
 @end
 
 @interface FLTTileOverlaysController : NSObject
-- (instancetype)init:(FlutterMethodChannel *)methodChannel
-             mapView:(GMSMapView *)mapView
-           registrar:(NSObject<FlutterPluginRegistrar> *)registrar;
-- (void)addTileOverlays:(NSArray *)tileOverlaysToAdd;
-- (void)changeTileOverlays:(NSArray *)tileOverlaysToChange;
-- (void)removeTileOverlayWithIdentifiers:(NSArray *)identifiers;
+- (instancetype)initWithMapView:(GMSMapView *)mapView
+                callbackHandler:(FGMMapsCallbackApi *)callbackHandler
+                      registrar:(NSObject<FlutterPluginRegistrar> *)registrar;
+- (void)addTileOverlays:(NSArray<FGMPlatformTileOverlay *> *)tileOverlaysToAdd;
+- (void)changeTileOverlays:(NSArray<FGMPlatformTileOverlay *> *)tileOverlaysToChange;
+- (void)removeTileOverlayWithIdentifiers:(NSArray<NSString *> *)identifiers;
 - (void)clearTileCacheWithIdentifier:(NSString *)identifier;
-- (nullable NSDictionary *)tileOverlayInfoWithIdentifier:(NSString *)identifier;
+- (nullable FLTGoogleMapTileOverlayController *)tileOverlayWithIdentifier:(NSString *)identifier;
 @end
 
 NS_ASSUME_NONNULL_END

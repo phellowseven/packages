@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -56,7 +56,7 @@ void main() {
       MarkerController(marker: marker, onTap: onTap);
 
       // Trigger a click event...
-      gmaps.Event.trigger(marker, 'click', <Object?>[gmaps.MapMouseEvent()]);
+      gmaps.event.trigger(marker, 'click', gmaps.MapMouseEvent());
 
       // The event handling is now truly async. Wait for it...
       expect(await methodCalled, isTrue);
@@ -66,8 +66,11 @@ void main() {
       MarkerController(marker: marker, onDragStart: onDragStart);
 
       // Trigger a drag end event...
-      gmaps.Event.trigger(marker, 'dragstart',
-          <Object?>[gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0)]);
+      gmaps.event.trigger(
+        marker,
+        'dragstart',
+        gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0),
+      );
 
       expect(await methodCalled, isTrue);
     });
@@ -76,10 +79,10 @@ void main() {
       MarkerController(marker: marker, onDrag: onDrag);
 
       // Trigger a drag end event...
-      gmaps.Event.trigger(
+      gmaps.event.trigger(
         marker,
         'drag',
-        <Object?>[gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0)],
+        gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0),
       );
 
       expect(await methodCalled, isTrue);
@@ -89,22 +92,22 @@ void main() {
       MarkerController(marker: marker, onDragEnd: onDragEnd);
 
       // Trigger a drag end event...
-      gmaps.Event.trigger(
+      gmaps.event.trigger(
         marker,
         'dragend',
-        <Object?>[gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0)],
+        gmaps.MapMouseEvent()..latLng = gmaps.LatLng(0, 0),
       );
 
       expect(await methodCalled, isTrue);
     });
 
     testWidgets('update', (WidgetTester tester) async {
-      final MarkerController controller = MarkerController(marker: marker);
-      final gmaps.MarkerOptions options = gmaps.MarkerOptions()
+      final controller = MarkerController(marker: marker);
+      final options = gmaps.MarkerOptions()
         ..draggable = true
         ..position = gmaps.LatLng(42, 54);
 
-      expect(marker.draggable, isNull);
+      expect(marker.isDraggableDefined(), isFalse);
 
       controller.update(options);
 
@@ -113,9 +116,10 @@ void main() {
       expect(marker.position?.lng, equals(54));
     });
 
-    testWidgets('infoWindow null, showInfoWindow.',
-        (WidgetTester tester) async {
-      final MarkerController controller = MarkerController(marker: marker);
+    testWidgets('infoWindow null, showInfoWindow.', (
+      WidgetTester tester,
+    ) async {
+      final controller = MarkerController(marker: marker);
 
       controller.showInfoWindow();
 
@@ -123,10 +127,10 @@ void main() {
     });
 
     testWidgets('showInfoWindow', (WidgetTester tester) async {
-      final gmaps.InfoWindow infoWindow = gmaps.InfoWindow();
-      final gmaps.GMap map = gmaps.GMap(createDivElement());
+      final infoWindow = gmaps.InfoWindow();
+      final map = gmaps.Map(createDivElement());
       marker.set('map', map);
-      final MarkerController controller = MarkerController(
+      final controller = MarkerController(
         marker: marker,
         infoWindow: infoWindow,
       );
@@ -138,10 +142,10 @@ void main() {
     });
 
     testWidgets('hideInfoWindow', (WidgetTester tester) async {
-      final gmaps.InfoWindow infoWindow = gmaps.InfoWindow();
-      final gmaps.GMap map = gmaps.GMap(createDivElement());
+      final infoWindow = gmaps.InfoWindow();
+      final map = gmaps.Map(createDivElement());
       marker.set('map', map);
-      final MarkerController controller = MarkerController(
+      final controller = MarkerController(
         marker: marker,
         infoWindow: infoWindow,
       );
@@ -156,8 +160,8 @@ void main() {
       late MarkerController controller;
 
       setUp(() {
-        final gmaps.InfoWindow infoWindow = gmaps.InfoWindow();
-        final gmaps.GMap map = gmaps.GMap(createDivElement());
+        final infoWindow = gmaps.InfoWindow();
+        final map = gmaps.Map(createDivElement());
         marker.set('map', map);
         controller = MarkerController(marker: marker, infoWindow: infoWindow);
       });
@@ -168,10 +172,10 @@ void main() {
         expect(controller.marker, isNull);
       });
 
-      testWidgets('cannot call update after remove',
-          (WidgetTester tester) async {
-        final gmaps.MarkerOptions options = gmaps.MarkerOptions()
-          ..draggable = true;
+      testWidgets('cannot call update after remove', (
+        WidgetTester tester,
+      ) async {
+        final options = gmaps.MarkerOptions()..draggable = true;
 
         controller.remove();
 
@@ -180,8 +184,9 @@ void main() {
         }, throwsAssertionError);
       });
 
-      testWidgets('cannot call showInfoWindow after remove',
-          (WidgetTester tester) async {
+      testWidgets('cannot call showInfoWindow after remove', (
+        WidgetTester tester,
+      ) async {
         controller.remove();
 
         expect(() {
@@ -189,8 +194,9 @@ void main() {
         }, throwsAssertionError);
       });
 
-      testWidgets('cannot call hideInfoWindow after remove',
-          (WidgetTester tester) async {
+      testWidgets('cannot call hideInfoWindow after remove', (
+        WidgetTester tester,
+      ) async {
         controller.remove();
 
         expect(() {

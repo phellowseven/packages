@@ -1,25 +1,33 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 package dev.flutter.packages.interactive_media_ads
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.ChecksSdkIntAtLeast
 import io.flutter.plugin.common.BinaryMessenger
 
 /**
- * Implementation of [PigeonProxyApiRegistrar] that provides each ProxyApi implementation and any
- * additional resources needed by an implementation.
+ * Implementation of [InteractiveMediaAdsLibraryPigeonProxyApiRegistrar] that provides each ProxyApi
+ * implementation and any additional resources needed by an implementation.
  */
 open class ProxyApiRegistrar(binaryMessenger: BinaryMessenger, var context: Context) :
-    PigeonProxyApiRegistrar(binaryMessenger) {
+    InteractiveMediaAdsLibraryPigeonProxyApiRegistrar(binaryMessenger) {
 
   // Added to be overriden for tests. The test implementation calls `callback` immediately, instead
   // of waiting for the main thread to run it.
   internal open fun runOnMainThread(callback: Runnable) {
     Handler(Looper.getMainLooper()).post { callback.run() }
+  }
+
+  // Interface for an injectable SDK version checker.
+  @ChecksSdkIntAtLeast(parameter = 0)
+  open fun sdkIsAtLeast(version: Int): Boolean {
+    return Build.VERSION.SDK_INT >= version
   }
 
   override fun getPigeonApiBaseDisplayContainer(): PigeonApiBaseDisplayContainer {
@@ -124,5 +132,37 @@ open class ProxyApiRegistrar(binaryMessenger: BinaryMessenger, var context: Cont
 
   override fun getPigeonApiMediaPlayer(): PigeonApiMediaPlayer {
     return MediaPlayerProxyApi(this)
+  }
+
+  override fun getPigeonApiAdsRenderingSettings(): PigeonApiAdsRenderingSettings {
+    return AdsRenderingSettingsProxyApi(this)
+  }
+
+  override fun getPigeonApiAdProgressInfo(): PigeonApiAdProgressInfo {
+    return AdProgressInfoProxyApi(this)
+  }
+
+  override fun getPigeonApiCompanionAd(): PigeonApiCompanionAd {
+    return CompanionAdProxyApi(this)
+  }
+
+  override fun getPigeonApiUniversalAdId(): PigeonApiUniversalAdId {
+    return UniversalAdIdProxyApi(this)
+  }
+
+  override fun getPigeonApiAd(): PigeonApiAd {
+    return AdProxyApi(this)
+  }
+
+  override fun getPigeonApiCompanionAdSlotClickListener(): PigeonApiCompanionAdSlotClickListener {
+    return CompanionAdSlotClickListenerProxyApi(this)
+  }
+
+  override fun getPigeonApiCompanionAdSlot(): PigeonApiCompanionAdSlot {
+    return CompanionAdSlotProxyApi(this)
+  }
+
+  override fun getPigeonApiAdSlot(): PigeonApiAdSlot {
+    return AdSlotProxyApi(this)
   }
 }

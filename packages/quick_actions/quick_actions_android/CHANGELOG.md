@@ -1,3 +1,60 @@
+## 1.0.27
+
+* Bumps com.android.tools.build:gradle from 8.12.1 to 8.13.1.
+
+## 1.0.26
+
+* Updates to Pigeon 26.
+* Updates minimum supported SDK version to Flutter 3.32/Dart 3.8.
+
+## 1.0.25
+
+* Resolves Gradle 9 deprecations.
+
+## 1.0.24
+
+* Updates Java compatibility version to 17.
+* Updates minimum supported SDK version to Flutter 3.35/Dart 3.9.
+
+## 1.0.23
+
+* Bumps com.android.tools.build:gradle to 8.12.1.
+* Updates minimum supported SDK version to Flutter 3.29/Dart 3.7.
+
+## 1.0.22
+
+* Updates kotlin version to 2.2.0 to enable gradle 8.11 support.
+
+## 1.0.21
+
+* Removes obsolete code related to supporting SDK <21.
+
+## 1.0.20
+
+* Updates compileSdk 34 to flutter.compileSdkVersion.
+
+## 1.0.19
+
+* Updates `pigeon` dependency to version 24.
+
+## 1.0.18
+
+* Updates Java compatibility version to 11.
+* Updates minimum supported SDK version to Flutter 3.24/Dart 3.5.
+
+## 1.0.17
+
+* Updates README to include more specific context on how to use launcher activities, including
+  a full explanation for https://github.com/flutter/flutter/issues/152883.
+
+## 1.0.16
+
+* Updates README to include guidance on using the plugin with a launcher activity.
+
+## 1.0.15
+
+* Updates lint checks to ignore NewerVersionAvailable.
+
 ## 1.0.14
 
 * Updates AGP version to 8.4.1.

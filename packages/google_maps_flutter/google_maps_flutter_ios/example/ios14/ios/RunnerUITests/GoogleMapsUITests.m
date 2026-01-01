@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,9 @@
 @import os.log;
 
 static const NSTimeInterval kWaitTime = 60;
+
+// TODO(bparrishMines): Remove once https://github.com/flutter/flutter/issues/154641 is fixed.
+static const BOOL skipFor154641 = YES;
 
 @interface GoogleMapsUITests : XCTestCase
 @property(nonatomic, strong) XCUIApplication *app;
@@ -46,6 +49,8 @@ static const NSTimeInterval kWaitTime = 60;
 }
 
 - (void)testUserInterface {
+  XCTSkipIf(skipFor154641);
+
   XCUIApplication *app = self.app;
   XCUIElement *userInteface = app.staticTexts[@"User interface"];
   if (![userInteface waitForExistenceWithTimeout:kWaitTime]) {
@@ -77,6 +82,8 @@ static const NSTimeInterval kWaitTime = 60;
 }
 
 - (void)testMapCoordinatesPage {
+  XCTSkipIf(skipFor154641);
+
   XCUIApplication *app = self.app;
   XCUIElement *mapCoordinates = app.staticTexts[@"Map coordinates"];
   if (![mapCoordinates waitForExistenceWithTimeout:kWaitTime]) {
@@ -168,6 +175,8 @@ static const NSTimeInterval kWaitTime = 60;
 }
 
 - (void)testMapClickPage {
+  XCTSkipIf(skipFor154641);
+
   XCUIApplication *app = self.app;
   XCUIElement *mapClick = app.staticTexts[@"Map click"];
   if (![mapClick waitForExistenceWithTimeout:kWaitTime]) {
@@ -212,6 +221,8 @@ static const NSTimeInterval kWaitTime = 60;
 }
 
 - (void)testMarkerDraggingCallbacks {
+  XCTSkipIf(skipFor154641);
+
   XCUIApplication *application = [[XCUIApplication alloc] init];
   [application launch];
   XCUIElement *placeMarkerButton = application.staticTexts[@"Place marker"];

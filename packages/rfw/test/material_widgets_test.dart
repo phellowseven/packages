@@ -1,6 +1,8 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// ignore_for_file: no_literal_bool_comparisons
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -9,23 +11,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rfw/formats.dart' show parseLibraryFile;
 import 'package:rfw/rfw.dart';
 
+import 'tolerant_comparator.dart'
+    if (dart.library.js_interop) 'tolerant_comparator_web.dart';
 import 'utils.dart';
 
+/// A const to tell apart Wasm from JS web.
+///
+/// This is used below to do comparisons of numbers, where in JS a whole double
+/// is serialized as "2", in Wasm (and non-web platforms) it's "2.0".
+const bool kIsJS = kIsWeb && !kIsWasm;
+
 void main() {
-  const LibraryName coreName = LibraryName(<String>['core']);
-  const LibraryName materialName = LibraryName(<String>['material']);
-  const LibraryName testName = LibraryName(<String>['test']);
+  const coreName = LibraryName(<String>['core']);
+  const materialName = LibraryName(<String>['material']);
+  const testName = LibraryName(<String>['test']);
 
   Runtime setupRuntime() {
-    return Runtime()
+    final runtime = Runtime()
       ..update(coreName, createCoreWidgets())
       ..update(materialName, createMaterialWidgets());
+    addTearDown(runtime.dispose);
+    return runtime;
   }
+
+  setUpAll(() {
+    setUpTolerantComparator(
+      testPath: 'test/material_widget_test.dart',
+      precisionTolerance: 0.00002,
+    );
+  });
 
   testWidgets('Material widgets', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -44,7 +63,9 @@ void main() {
       contains('Could not find remote widget named'),
     );
 
-    runtime.update(const LibraryName(<String>['test']), parseLibraryFile('''
+    runtime.update(
+      const LibraryName(<String>['test']),
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -189,12 +210,15 @@ void main() {
           child: Placeholder(),
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.scaffold.png'),
-      skip: !runGoldens,
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
+      skip: !runGoldens || true,
     );
 
     await tester.tap(find.byType(DropdownButton<Object>).first);
@@ -202,8 +226,8 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/material_test.dropdown.png'),
-      // TODO(bparrishMines): Unskip once golden file is updated. See
-      // https://github.com/flutter/flutter/issues/150127
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
       skip: !runGoldens || true,
     );
     // Tap on the second item.
@@ -217,8 +241,10 @@ void main() {
     await tester.tap(find.text('second'));
     await tester.pumpAndSettle();
     expect(eventLog, contains('menu_item {args: second}'));
-    expect(eventLog,
-        contains(kIsWeb ? 'dropdown {value: 2}' : 'dropdown {value: 2.0}'));
+    expect(
+      eventLog,
+      contains(kIsJS ? 'dropdown {value: 2}' : 'dropdown {value: 2.0}'),
+    );
 
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
@@ -226,14 +252,14 @@ void main() {
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.drawer.png'),
-      skip: !runGoldens,
+      skip: !runGoldens || true,
     );
   });
 
   testWidgets('Implement ButtonBar properties', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -256,7 +282,9 @@ void main() {
       await tester.binding.setSurfaceSize(null);
     });
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -285,13 +313,16 @@ void main() {
           ),
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
 
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.button_bar_properties.png'),
-      skip: !runGoldens,
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
+      skip: !runGoldens || true,
     );
 
     // Update the surface size for ButtonBar to overflow.
@@ -301,16 +332,18 @@ void main() {
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile(
-          'goldens/material_test.button_bar_properties.overflow.png'),
-      skip: !runGoldens,
+        'goldens/material_test.button_bar_properties.overflow.png',
+      ),
+      skip: !runGoldens || true,
     );
   });
 
-  testWidgets('OverflowBar configured to resemble ButtonBar',
-      (WidgetTester tester) async {
+  testWidgets('OverflowBar configured to resemble ButtonBar', (
+    WidgetTester tester,
+  ) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -329,7 +362,9 @@ void main() {
       contains('Could not find remote widget named'),
     );
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -357,20 +392,24 @@ void main() {
           ),
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile(
-          'goldens/material_test.overflow_bar_resembles_button_bar.png'),
-      skip: !runGoldens,
+        'goldens/material_test.overflow_bar_resembles_button_bar.png',
+      ),
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
+      skip: !runGoldens || true,
     );
   });
 
   testWidgets('Implement OverflowBar properties', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -393,7 +432,9 @@ void main() {
       await tester.binding.setSurfaceSize(null);
     });
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -421,13 +462,14 @@ void main() {
           ),
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
 
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.overflow_bar_properties.png'),
-      skip: !runGoldens,
+      skip: !runGoldens || true,
     );
 
     // Update the surface size for OverflowBar to overflow.
@@ -437,15 +479,18 @@ void main() {
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile(
-          'goldens/material_test.overflow_bar_properties.overflow.png'),
-      skip: !runGoldens,
+        'goldens/material_test.overflow_bar_properties.overflow.png',
+      ),
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
+      skip: !runGoldens || true,
     );
   });
 
   testWidgets('Implement InkResponse properties', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -464,7 +509,9 @@ void main() {
       contains('Could not find remote widget named'),
     );
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -482,15 +529,17 @@ void main() {
           ),
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
 
     expect(find.byType(InkResponse), findsOneWidget);
 
     // Hover
     final Offset center = tester.getCenter(find.byType(InkResponse));
-    final TestGesture gesture =
-        await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
@@ -499,20 +548,21 @@ void main() {
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.ink_response_hover.png'),
-      skip: !runGoldens,
+      skip: !runGoldens || true,
     );
     expect(eventLog, contains('onHover {}'));
 
     // Tap
     await gesture.down(center);
     await tester.pump(); // start gesture
-    await tester.pump(const Duration(
-        milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(
+      const Duration(milliseconds: 200),
+    ); // wait for splash to be well under way
 
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.ink_response_tap.png'),
-      skip: !runGoldens,
+      skip: !runGoldens || true,
     );
     await gesture.up();
     await tester.pump();
@@ -522,8 +572,8 @@ void main() {
 
   testWidgets('Implement Material properties', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -542,7 +592,9 @@ void main() {
       contains('Could not find remote widget named'),
     );
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Material(
@@ -558,22 +610,29 @@ void main() {
           height: 20.0,
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
 
-    expect(tester.widget<Material>(find.byType(Material)).animationDuration,
-        const Duration(milliseconds: 300));
-    expect(tester.widget<Material>(find.byType(Material)).borderOnForeground,
-        false);
+    expect(
+      tester.widget<Material>(find.byType(Material)).animationDuration,
+      const Duration(milliseconds: 300),
+    );
+    expect(
+      tester.widget<Material>(find.byType(Material)).borderOnForeground,
+      false,
+    );
     await expectLater(
       find.byType(RemoteWidget),
       matchesGoldenFile('goldens/material_test.material_properties.png'),
-      // TODO(bparrishMines): Unskip once golden file is updated. See
-      // https://github.com/flutter/flutter/issues/150127
+      // TODO(louisehsu): Unskip once golden file is updated. See
+      // https://github.com/flutter/flutter/issues/151995
       skip: !runGoldens || true,
     );
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Material(
@@ -584,17 +643,20 @@ void main() {
           height: 20.0,
         ),
       );
-    '''));
+    '''),
+    );
     await tester.pump();
 
-    expect(tester.widget<Material>(find.byType(Material)).clipBehavior,
-        Clip.antiAlias);
+    expect(
+      tester.widget<Material>(find.byType(Material)).clipBehavior,
+      Clip.antiAlias,
+    );
   });
 
   testWidgets('Slider properties', (WidgetTester tester) async {
     final Runtime runtime = setupRuntime();
-    final DynamicContent data = DynamicContent();
-    final List<String> eventLog = <String>[];
+    final data = DynamicContent();
+    final eventLog = <String>[];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -613,7 +675,9 @@ void main() {
       contains('Could not find remote widget named'),
     );
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       widget root = Scaffold(
@@ -629,7 +693,8 @@ void main() {
           secondaryActiveColor: 0xFFFF0000,
           thumbColor: 0xFF000000,
       )));
-    '''));
+    '''),
+    );
     await tester.pump();
 
     final Finder sliderFinder = find.byType(Slider);
@@ -643,7 +708,9 @@ void main() {
     expect(slider.secondaryActiveColor, const Color(0xFFFF0000));
     expect(slider.thumbColor, const Color(0xFF000000));
 
-    runtime.update(testName, parseLibraryFile('''
+    runtime.update(
+      testName,
+      parseLibraryFile('''
       import core;
       import material;
       
@@ -658,30 +725,37 @@ void main() {
             divisions: 100,
             value: 0.0,
         )));
-    '''));
+    '''),
+    );
     await tester.pump();
 
     //drag slider
     await _slideToValue(tester, sliderFinder, 20.0);
     await tester.pumpAndSettle();
-    expect(eventLog,
-        contains(kIsWeb ? 'slider {value: 20}' : 'slider {value: 20.0}'));
     expect(
-        eventLog,
-        contains(
-            kIsWeb ? 'slider.start {value: 0}' : 'slider.start {value: 0.0}'));
+      eventLog,
+      contains(kIsJS ? 'slider {value: 20}' : 'slider {value: 20.0}'),
+    );
     expect(
-        eventLog,
-        contains(
-            kIsWeb ? 'slider.end {value: 20}' : 'slider.end {value: 20.0}'));
+      eventLog,
+      contains(kIsJS ? 'slider.start {value: 0}' : 'slider.start {value: 0.0}'),
+    );
+    expect(
+      eventLog,
+      contains(kIsJS ? 'slider.end {value: 20}' : 'slider.end {value: 20.0}'),
+    );
   });
 }
 
 // slide to value for material slider in tests
 Future<void> _slideToValue(
-    WidgetTester widgetTester, Finder slider, double value,
-    {double paddingOffset = 24.0}) async {
-  final Offset zeroPoint = widgetTester.getTopLeft(slider) +
+  WidgetTester widgetTester,
+  Finder slider,
+  double value, {
+  double paddingOffset = 24.0,
+}) async {
+  final Offset zeroPoint =
+      widgetTester.getTopLeft(slider) +
       Offset(paddingOffset, widgetTester.getSize(slider).height / 2);
   final double totalWidth =
       widgetTester.getSize(slider).width - (2 * paddingOffset);

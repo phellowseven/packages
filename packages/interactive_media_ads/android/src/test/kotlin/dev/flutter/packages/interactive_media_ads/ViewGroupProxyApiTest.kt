@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,5 +20,16 @@ class ViewGroupProxyApiTest {
     api.addView(instance, mockView)
 
     verify(instance).addView(mockView)
+  }
+
+  @Test
+  fun removeView() {
+    val api = TestProxyApiRegistrar().getPigeonApiViewGroup()
+
+    val instance = mock<ViewGroup>()
+    val mockView = mock<View>()
+    api.removeView(instance, mockView)
+
+    verify(instance).removeView(mockView)
   }
 }

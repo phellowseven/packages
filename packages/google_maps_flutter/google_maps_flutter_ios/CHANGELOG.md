@@ -1,3 +1,80 @@
+## 2.15.8
+
+* Replaces internal use of deprecated methods.
+
+## 2.15.7
+
+* Updates to Pigeon 26.
+
+## 2.15.6
+
+* Fixes potential flickers of default property values when adding objects to
+  the map.
+* Updates minimum supported SDK version to Flutter 3.32/Dart 3.8.
+
+## 2.15.5
+
+* Fixes `kCGImageAlphaPremultipliedLast` implicit conversion from enumeration type warning.
+
+## 2.15.4
+
+* Deprecates `zIndex` parameter in Marker in favor of `zIndexInt`.
+
+## 2.15.3
+
+* Fixes new analysis warnings.
+* Updates minimum supported SDK version to Flutter 3.27/Dart 3.6.
+
+## 2.15.2
+
+* Fixes regression where updating a marker hides its info window.
+
+## 2.15.1
+
+* Fixes regression in displaying info windows.
+
+## 2.15.0
+
+* Adds support for animating the camera with a duration.
+
+## 2.14.0
+
+* Adds support for ground overlay.
+* Updates minimum supported SDK version to Flutter 3.22/Dart 3.4.
+
+## 2.13.2
+
+* Updates most objects passed from Dart to native to use typed data.
+
+## 2.13.1
+
+* Updates Pigeon for non-nullable collection type support.
+
+## 2.13.0
+
+* Updates map configuration and platform view creation parameters to use Pigeon.
+* Updates minimum supported SDK version to Flutter 3.19/Dart 3.3.
+
+## 2.12.0
+
+* Adds support for marker clustering.
+
+## 2.11.0
+
+* Adds support for heatmap layers.
+
+## 2.10.0
+
+* Converts Obj-C->Dart calls to Pigeon.
+
+## 2.9.0
+
+* Converts additional platform calls to Pigeon.
+
+## 2.8.2
+
+* Converts inspector interface platform calls to Pigeon.
+
 ## 2.8.1
 
 * Improves Objective-C type handling.

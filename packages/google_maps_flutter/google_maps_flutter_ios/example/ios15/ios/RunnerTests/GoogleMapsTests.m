@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,10 +40,11 @@
       initWithFrame:frame
              camera:[[GMSCameraPosition alloc] initWithLatitude:0 longitude:0 zoom:0]];
 #pragma clang diagnostic pop
-  FLTGoogleMapController *controller = [[FLTGoogleMapController alloc] initWithMapView:mapView
-                                                                        viewIdentifier:0
-                                                                             arguments:nil
-                                                                             registrar:registrar];
+  FLTGoogleMapController *controller =
+      [[FLTGoogleMapController alloc] initWithMapView:mapView
+                                       viewIdentifier:0
+                                   creationParameters:[self emptyCreationParameters]
+                                            registrar:registrar];
 
   for (NSInteger i = 0; i < 10; ++i) {
     [controller view];
@@ -83,6 +84,27 @@
 
   // non wide gamut images use 8 bit format
   XCTAssert(bitsPerComponent == 8);
+}
+
+/// Creates an empty creation paramaters object for tests where the values don't matter, just that
+/// there's a valid object to pass in.
+- (FGMPlatformMapViewCreationParams *)emptyCreationParameters {
+  return [FGMPlatformMapViewCreationParams
+      makeWithInitialCameraPosition:[FGMPlatformCameraPosition
+                                        makeWithBearing:0.0
+                                                 target:[FGMPlatformLatLng makeWithLatitude:0.0
+                                                                                  longitude:0.0]
+                                                   tilt:0.0
+                                                   zoom:0.0]
+                   mapConfiguration:[[FGMPlatformMapConfiguration alloc] init]
+                     initialCircles:@[]
+                     initialMarkers:@[]
+                    initialPolygons:@[]
+                   initialPolylines:@[]
+                    initialHeatmaps:@[]
+                initialTileOverlays:@[]
+             initialClusterManagers:@[]
+              initialGroundOverlays:@[]];
 }
 
 @end

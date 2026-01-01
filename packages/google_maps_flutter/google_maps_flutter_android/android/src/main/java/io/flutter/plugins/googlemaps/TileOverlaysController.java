@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugins.googlemaps.Messages.MapsCallbackApi;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,40 +17,27 @@ import java.util.Map;
 class TileOverlaysController {
 
   private final Map<String, TileOverlayController> tileOverlayIdToController;
-  private final MethodChannel methodChannel;
+  private final MapsCallbackApi flutterApi;
   private GoogleMap googleMap;
 
-  TileOverlaysController(MethodChannel methodChannel) {
+  TileOverlaysController(MapsCallbackApi flutterApi) {
     this.tileOverlayIdToController = new HashMap<>();
-    this.methodChannel = methodChannel;
+    this.flutterApi = flutterApi;
   }
 
   void setGoogleMap(GoogleMap googleMap) {
     this.googleMap = googleMap;
   }
 
-  void addJsonTileOverlays(List<Map<String, ?>> tileOverlaysToAdd) {
-    if (tileOverlaysToAdd == null) {
-      return;
-    }
-    for (Map<String, ?> tileOverlayToAdd : tileOverlaysToAdd) {
-      addJsonTileOverlay(tileOverlayToAdd);
-    }
-  }
-
   void addTileOverlays(@NonNull List<Messages.PlatformTileOverlay> tileOverlaysToAdd) {
     for (Messages.PlatformTileOverlay tileOverlayToAdd : tileOverlaysToAdd) {
-      @SuppressWarnings("unchecked")
-      final Map<String, ?> overlayJson = (Map<String, ?>) tileOverlayToAdd.getJson();
-      addJsonTileOverlay(overlayJson);
+      addTileOverlay(tileOverlayToAdd);
     }
   }
 
   void changeTileOverlays(@NonNull List<Messages.PlatformTileOverlay> tileOverlaysToChange) {
     for (Messages.PlatformTileOverlay tileOverlayToChange : tileOverlaysToChange) {
-      @SuppressWarnings("unchecked")
-      final Map<String, ?> overlayJson = (Map<String, ?>) tileOverlayToChange.getJson();
-      changeJsonTileOverlay(overlayJson);
+      changeTileOverlay(tileOverlayToChange);
     }
   }
 
@@ -88,15 +75,12 @@ class TileOverlaysController {
     return tileOverlayController.getTileOverlay();
   }
 
-  private void addJsonTileOverlay(Map<String, ?> tileOverlayOptions) {
-    if (tileOverlayOptions == null) {
-      return;
-    }
+  private void addTileOverlay(@NonNull Messages.PlatformTileOverlay platformTileOverlay) {
     TileOverlayBuilder tileOverlayOptionsBuilder = new TileOverlayBuilder();
     String tileOverlayId =
-        Convert.interpretTileOverlayOptions(tileOverlayOptions, tileOverlayOptionsBuilder);
+        Convert.interpretTileOverlayOptions(platformTileOverlay, tileOverlayOptionsBuilder);
     TileProviderController tileProviderController =
-        new TileProviderController(methodChannel, tileOverlayId);
+        new TileProviderController(flutterApi, tileOverlayId);
     tileOverlayOptionsBuilder.setTileProvider(tileProviderController);
     TileOverlayOptions options = tileOverlayOptionsBuilder.build();
     TileOverlay tileOverlay = googleMap.addTileOverlay(options);
@@ -104,14 +88,11 @@ class TileOverlaysController {
     tileOverlayIdToController.put(tileOverlayId, tileOverlayController);
   }
 
-  private void changeJsonTileOverlay(Map<String, ?> tileOverlayOptions) {
-    if (tileOverlayOptions == null) {
-      return;
-    }
-    String tileOverlayId = getTileOverlayId(tileOverlayOptions);
+  private void changeTileOverlay(@NonNull Messages.PlatformTileOverlay platformTileOverlay) {
+    String tileOverlayId = platformTileOverlay.getTileOverlayId();
     TileOverlayController tileOverlayController = tileOverlayIdToController.get(tileOverlayId);
     if (tileOverlayController != null) {
-      Convert.interpretTileOverlayOptions(tileOverlayOptions, tileOverlayController);
+      Convert.interpretTileOverlayOptions(platformTileOverlay, tileOverlayController);
     }
   }
 

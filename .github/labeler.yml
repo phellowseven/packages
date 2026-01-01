@@ -13,11 +13,6 @@
     - any-glob-to-any-file:
       - packages/cross_file/**/*
 
-'p: css_colors':
-  - changed-files:
-    - any-glob-to-any-file:
-      - packages/css_colors/**/*
-
 'p: cupertino_icons':
   - changed-files:
     - any-glob-to-any-file:
@@ -38,35 +33,21 @@
     - any-glob-to-any-file:
       - packages/file_selector/**/*
 
-'p: flutter_adaptive_scaffold':
-  - changed-files:
-    - any-glob-to-any-file:
-      - packages/flutter_adaptive_scaffold/**/*
-
-'p: flutter_image':
-  - changed-files:
-    - any-glob-to-any-file:
-      - packages/flutter_image/**/*
-
 'p: flutter_lints':
   - changed-files:
     - any-glob-to-any-file:
       - packages/flutter_lints/**/*
 
-'p: flutter_markdown':
-  - changed-files:
-    - any-glob-to-any-file:
-      - packages/flutter_markdown/**/*
-
-'p: flutter_migrate':
-  - changed-files:
-    - any-glob-to-any-file:
-      - packages/flutter_migrate/**/*
-
 'p: flutter_plugin_android_lifecycle':
   - changed-files:
     - any-glob-to-any-file:
       - packages/flutter_plugin_android_lifecycle/**/*
+
+'p: flutter_svg':
+  - changed-files:
+    - any-glob-to-any-file:
+      - third_party/packages/flutter_svg/**/*
+      - third_party/packages/flutter_svg_test/**/*
 
 'p: flutter_template_images':
   - changed-files:
@@ -83,10 +64,20 @@
     - any-glob-to-any-file:
       - packages/go_router_builder/**/*
 
+'p: google_adsense':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/google_adsense/**/*
+
 'p: google_identity_services':
   - changed-files:
     - any-glob-to-any-file:
-      - packages/google_indentity_services_web/**
+      - packages/google_identity_services_web/**/*
+
+'p: google_fonts':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/google_fonts/**/*
 
 'p: google_maps_flutter':
   - changed-files:
@@ -108,10 +99,10 @@
     - any-glob-to-any-file:
       - packages/in_app_purchase/**/*
 
-'p: ios_platform_images':
+'p: interactive_media_ads':
   - changed-files:
     - any-glob-to-any-file:
-      - packages/ios_platform_images/**/*
+      - packages/interactive_media_ads/**/*
 
 'p: local_auth':
   - changed-files:
@@ -128,10 +119,15 @@
     - any-glob-to-any-file:
       - packages/multicast_dns/**/*
 
-'p: palette_generator':
+'p: mustache_template':
   - changed-files:
     - any-glob-to-any-file:
-      - packages/palette_generator/**/*
+      - third_party/packages/mustache_template/**/*
+
+'p: path_parsing':
+  - changed-files:
+    - any-glob-to-any-file:
+      - third_party/packages/path_parsing/**/*
 
 'p: path_provider':
   - changed-files:
@@ -173,10 +169,22 @@
     - any-glob-to-any-file:
       - packages/standard_message_codec/**/*
 
+'p: two_dimensional_scrollables':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/two_dimensional_scrollables/**/*
+
 'p: url_launcher':
   - changed-files:
     - any-glob-to-any-file:
       - packages/url_launcher/**/*
+
+'p: vector_graphics':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/vector_graphics/**/*
+      - packages/vector_graphics_codec/**/*
+      - packages/vector_graphics_compiler/**/*
 
 'p: video_player':
   - changed-files:
@@ -245,3 +253,22 @@
       - packages/*/*_windows/**/*
       - packages/**/windows/**/*
 
+'triage-engine':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/vector_graphics/**/*
+      - packages/vector_graphics_codec/**/*
+      - packages/vector_graphics_compiler/**/*
+      - third_party/packages/flutter_svg/**/*
+      - third_party/packages/flutter_svg_test/**/*
+
+'triage-framework':
+  - changed-files:
+    - any-glob-to-any-file:
+      - packages/animations/**/*
+      - packages/flutter_lints/**/*
+      - packages/go_router/**/*
+      - packages/go_router_builder/**/*
+      - packages/google_fonts/**/*
+      - packages/two_dimensional_scrollables/**/*
+      - third_party/packages/cupertino_icons/**/*

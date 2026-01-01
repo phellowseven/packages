@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,57 +10,51 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.collections.MarkerManager;
-import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugins.googlemaps.Messages.MapsCallbackApi;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 class MarkersController {
   private final HashMap<String, MarkerBuilder> markerIdToMarkerBuilder;
   private final HashMap<String, MarkerController> markerIdToController;
   private final HashMap<String, String> googleMapsMarkerIdToDartMarkerId;
-  private final MethodChannel methodChannel;
+  private final @NonNull MapsCallbackApi flutterApi;
   private MarkerManager.Collection markerCollection;
   private final ClusterManagersController clusterManagersController;
   private final AssetManager assetManager;
   private final float density;
+  private final Convert.BitmapDescriptorFactoryWrapper bitmapDescriptorFactoryWrapper;
 
   MarkersController(
-      MethodChannel methodChannel,
+      @NonNull MapsCallbackApi flutterApi,
       ClusterManagersController clusterManagersController,
       AssetManager assetManager,
-      float density) {
+      float density,
+      Convert.BitmapDescriptorFactoryWrapper bitmapDescriptorFactoryWrapper) {
     this.markerIdToMarkerBuilder = new HashMap<>();
     this.markerIdToController = new HashMap<>();
     this.googleMapsMarkerIdToDartMarkerId = new HashMap<>();
-    this.methodChannel = methodChannel;
+    this.flutterApi = flutterApi;
     this.clusterManagersController = clusterManagersController;
     this.assetManager = assetManager;
     this.density = density;
+    this.bitmapDescriptorFactoryWrapper = bitmapDescriptorFactoryWrapper;
   }
 
   void setCollection(MarkerManager.Collection markerCollection) {
     this.markerCollection = markerCollection;
   }
 
-  void addJsonMarkers(List<Object> markersToAdd) {
-    if (markersToAdd != null) {
-      for (Object markerToAdd : markersToAdd) {
-        addJsonMarker(markerToAdd);
-      }
-    }
-  }
-
   void addMarkers(@NonNull List<Messages.PlatformMarker> markersToAdd) {
     for (Messages.PlatformMarker markerToAdd : markersToAdd) {
-      addJsonMarker(markerToAdd.getJson());
+      addMarker(markerToAdd);
     }
   }
 
   void changeMarkers(@NonNull List<Messages.PlatformMarker> markersToChange) {
     for (Messages.PlatformMarker markerToChange : markersToChange) {
-      changeJsonMarker(markerToChange.getJson());
+      changeMarker(markerToChange);
     }
   }
 
@@ -126,7 +120,7 @@ class MarkersController {
   }
 
   boolean onMarkerTap(String markerId) {
-    methodChannel.invokeMethod("marker#onTap", Convert.markerIdToJson(markerId));
+    flutterApi.onMarkerTap(markerId, new NoOpVoidResult());
     MarkerController markerController = markerIdToController.get(markerId);
     if (markerController != null) {
       return markerController.consumeTapEvents();
@@ -139,10 +133,7 @@ class MarkersController {
     if (markerId == null) {
       return;
     }
-    final Map<String, Object> data = new HashMap<>();
-    data.put("markerId", markerId);
-    data.put("position", Convert.latLngToJson(latLng));
-    methodChannel.invokeMethod("marker#onDragStart", data);
+    flutterApi.onMarkerDragStart(markerId, Convert.latLngToPigeon(latLng), new NoOpVoidResult());
   }
 
   void onMarkerDrag(String googleMarkerId, LatLng latLng) {
@@ -150,10 +141,7 @@ class MarkersController {
     if (markerId == null) {
       return;
     }
-    final Map<String, Object> data = new HashMap<>();
-    data.put("markerId", markerId);
-    data.put("position", Convert.latLngToJson(latLng));
-    methodChannel.invokeMethod("marker#onDrag", data);
+    flutterApi.onMarkerDrag(markerId, Convert.latLngToPigeon(latLng), new NoOpVoidResult());
   }
 
   void onMarkerDragEnd(String googleMarkerId, LatLng latLng) {
@@ -161,10 +149,7 @@ class MarkersController {
     if (markerId == null) {
       return;
     }
-    final Map<String, Object> data = new HashMap<>();
-    data.put("markerId", markerId);
-    data.put("position", Convert.latLngToJson(latLng));
-    methodChannel.invokeMethod("marker#onDragEnd", data);
+    flutterApi.onMarkerDragEnd(markerId, Convert.latLngToPigeon(latLng), new NoOpVoidResult());
   }
 
   void onInfoWindowTap(String googleMarkerId) {
@@ -172,7 +157,7 @@ class MarkersController {
     if (markerId == null) {
       return;
     }
-    methodChannel.invokeMethod("infoWindow#onTap", Convert.markerIdToJson(markerId));
+    flutterApi.onInfoWindowTap(markerId, new NoOpVoidResult());
   }
 
   /**
@@ -186,17 +171,12 @@ class MarkersController {
     }
   }
 
-  private void addJsonMarker(Object marker) {
-    if (marker == null) {
-      return;
-    }
-    String markerId = getMarkerId(marker);
-    if (markerId == null) {
-      throw new IllegalArgumentException("markerId was null");
-    }
-    String clusterManagerId = getClusterManagerId(marker);
+  private void addMarker(@NonNull Messages.PlatformMarker marker) {
+    String markerId = marker.getMarkerId();
+    String clusterManagerId = marker.getClusterManagerId();
     MarkerBuilder markerBuilder = new MarkerBuilder(markerId, clusterManagerId);
-    Convert.interpretMarkerOptions(marker, markerBuilder, assetManager, density);
+    Convert.interpretMarkerOptions(
+        marker, markerBuilder, assetManager, density, bitmapDescriptorFactoryWrapper);
     addMarker(markerBuilder);
   }
 
@@ -232,47 +212,34 @@ class MarkersController {
     googleMapsMarkerIdToDartMarkerId.put(marker.getId(), markerId);
   }
 
-  private void changeJsonMarker(Object marker) {
-    if (marker == null) {
-      return;
-    }
-    String markerId = getMarkerId(marker);
+  private void changeMarker(@NonNull Messages.PlatformMarker marker) {
+    String markerId = marker.getMarkerId();
 
     MarkerBuilder markerBuilder = markerIdToMarkerBuilder.get(markerId);
     if (markerBuilder == null) {
       return;
     }
 
-    String clusterManagerId = getClusterManagerId(marker);
+    String clusterManagerId = marker.getClusterManagerId();
     String oldClusterManagerId = markerBuilder.clusterManagerId();
 
     // If the cluster ID on the updated marker has changed, the marker needs to
     // be removed and re-added to update its cluster manager state.
     if (!(Objects.equals(clusterManagerId, oldClusterManagerId))) {
       removeMarker(markerId);
-      addJsonMarker(marker);
+      addMarker(marker);
       return;
     }
 
     // Update marker builder.
-    Convert.interpretMarkerOptions(marker, markerBuilder, assetManager, density);
+    Convert.interpretMarkerOptions(
+        marker, markerBuilder, assetManager, density, bitmapDescriptorFactoryWrapper);
 
     // Update existing marker on map.
     MarkerController markerController = markerIdToController.get(markerId);
     if (markerController != null) {
-      Convert.interpretMarkerOptions(marker, markerController, assetManager, density);
+      Convert.interpretMarkerOptions(
+          marker, markerController, assetManager, density, bitmapDescriptorFactoryWrapper);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private static String getMarkerId(Object marker) {
-    Map<String, Object> markerMap = (Map<String, Object>) marker;
-    return (String) markerMap.get("markerId");
-  }
-
-  @SuppressWarnings("unchecked")
-  private static String getClusterManagerId(Object marker) {
-    Map<String, Object> markerMap = (Map<String, Object>) marker;
-    return (String) markerMap.get("clusterManagerId");
   }
 }

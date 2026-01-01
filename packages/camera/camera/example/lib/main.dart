@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,12 +54,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   double _minAvailableExposureOffset = 0.0;
   double _maxAvailableExposureOffset = 0.0;
   double _currentExposureOffset = 0.0;
-  late AnimationController _flashModeControlRowAnimationController;
-  late Animation<double> _flashModeControlRowAnimation;
-  late AnimationController _exposureModeControlRowAnimationController;
-  late Animation<double> _exposureModeControlRowAnimation;
-  late AnimationController _focusModeControlRowAnimationController;
-  late Animation<double> _focusModeControlRowAnimation;
+  late final AnimationController _flashModeControlRowAnimationController;
+  late final CurvedAnimation _flashModeControlRowAnimation;
+  late final AnimationController _exposureModeControlRowAnimationController;
+  late final CurvedAnimation _exposureModeControlRowAnimation;
+  late final AnimationController _focusModeControlRowAnimationController;
+  late final CurvedAnimation _focusModeControlRowAnimation;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentScale = 1.0;
@@ -103,7 +103,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _flashModeControlRowAnimationController.dispose();
+    _flashModeControlRowAnimation.dispose();
     _exposureModeControlRowAnimationController.dispose();
+    _exposureModeControlRowAnimation.dispose();
+    _focusModeControlRowAnimationController.dispose();
+    _focusModeControlRowAnimation.dispose();
     super.dispose();
   }
 
@@ -128,9 +132,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Camera example'),
-      ),
+      appBar: AppBar(title: const Text('Camera example')),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -140,16 +142,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                 border: Border.all(
                   color:
                       controller != null && controller!.value.isRecordingVideo
-                          ? Colors.redAccent
-                          : Colors.grey,
+                      ? Colors.redAccent
+                      : Colors.grey,
                   width: 3.0,
                 ),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: Center(
-                  child: _cameraPreviewWidget(),
-                ),
+                child: Center(child: _cameraPreviewWidget()),
               ),
             ),
           ),
@@ -158,10 +158,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: Row(
-              children: <Widget>[
-                _cameraTogglesRowWidget(),
-                _thumbnailWidget(),
-              ],
+              children: <Widget>[_cameraTogglesRowWidget(), _thumbnailWidget()],
             ),
           ),
         ],
@@ -189,15 +186,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         child: CameraPreview(
           controller!,
           child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onScaleStart: _handleScaleStart,
-              onScaleUpdate: _handleScaleUpdate,
-              onTapDown: (TapDownDetails details) =>
-                  onViewFinderTap(details, constraints),
-            );
-          }),
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                onTapDown: (TapDownDetails details) =>
+                    onViewFinderTap(details, constraints),
+              );
+            },
+          ),
         ),
       );
     }
@@ -213,51 +211,43 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return;
     }
 
-    _currentScale = (_baseScale * details.scale)
-        .clamp(_minAvailableZoom, _maxAvailableZoom);
+    _currentScale = (_baseScale * details.scale).clamp(
+      _minAvailableZoom,
+      _maxAvailableZoom,
+    );
 
     await controller!.setZoomLevel(_currentScale);
   }
 
   /// Display the thumbnail of the captured image or video.
   Widget _thumbnailWidget() {
-    final VideoPlayerController? localVideoController = videoController;
-
-    return Expanded(
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (localVideoController == null && imageFile == null)
-              Container()
-            else
-              SizedBox(
-                width: 64.0,
-                height: 64.0,
-                child: (localVideoController == null)
-                    ? (
-                        // The captured image on the web contains a network-accessible URL
-                        // pointing to a location within the browser. It may be displayed
-                        // either with Image.network or Image.memory after loading the image
-                        // bytes to memory.
-                        kIsWeb
-                            ? Image.network(imageFile!.path)
-                            : Image.file(File(imageFile!.path)))
-                    : Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.pink)),
-                        child: Center(
-                          child: AspectRatio(
-                              aspectRatio:
-                                  localVideoController.value.aspectRatio,
-                              child: VideoPlayer(localVideoController)),
-                        ),
-                      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (videoController case final VideoPlayerController controller?)
+          Container(
+            width: 64.0,
+            height: 64.0,
+            decoration: BoxDecoration(border: Border.all(color: Colors.pink)),
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: VideoPlayer(controller),
               ),
-          ],
-        ),
-      ),
+            ),
+          )
+        else if (imageFile?.path case final String path)
+          Container(
+            width: 64.0,
+            height: 64.0,
+            decoration: BoxDecoration(border: Border.all(color: Colors.pink)),
+            // The captured image on the web contains a network-accessible URL
+            // pointing to a location within the browser. It may be displayed
+            // either with Image.network or Image.memory after loading the image
+            // bytes to memory.
+            child: kIsWeb ? Image.network(path) : Image.file(File(path)),
+          ),
+      ],
     );
   }
 
@@ -286,9 +276,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     IconButton(
                       icon: const Icon(Icons.filter_center_focus),
                       color: Colors.blue,
-                      onPressed:
-                          controller != null ? onFocusModeButtonPressed : null,
-                    )
+                      onPressed: controller != null
+                          ? onFocusModeButtonPressed
+                          : null,
+                    ),
                   ]
                 : <Widget>[],
             IconButton(
@@ -297,9 +288,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               onPressed: controller != null ? onAudioModeButtonPressed : null,
             ),
             IconButton(
-              icon: Icon(controller?.value.isCaptureOrientationLocked ?? false
-                  ? Icons.screen_lock_rotation
-                  : Icons.screen_rotation),
+              icon: Icon(
+                controller?.value.isCaptureOrientationLocked ?? false
+                    ? Icons.screen_lock_rotation
+                    : Icons.screen_rotation,
+              ),
               color: Colors.blue,
               onPressed: controller != null
                   ? onCaptureOrientationLockButtonPressed
@@ -382,9 +375,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           color: Colors.grey.shade50,
           child: Column(
             children: <Widget>[
-              const Center(
-                child: Text('Exposure Mode'),
-              ),
+              const Center(child: Text('Exposure Mode')),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -392,7 +383,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     style: styleAuto,
                     onPressed: controller != null
                         ? () =>
-                            onSetExposureModeButtonPressed(ExposureMode.auto)
+                              onSetExposureModeButtonPressed(ExposureMode.auto)
                         : null,
                     onLongPress: () {
                       if (controller != null) {
@@ -405,8 +396,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   TextButton(
                     style: styleLocked,
                     onPressed: controller != null
-                        ? () =>
-                            onSetExposureModeButtonPressed(ExposureMode.locked)
+                        ? () => onSetExposureModeButtonPressed(
+                            ExposureMode.locked,
+                          )
                         : null,
                     child: const Text('LOCKED'),
                   ),
@@ -419,9 +411,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   ),
                 ],
               ),
-              const Center(
-                child: Text('Exposure Offset'),
-              ),
+              const Center(child: Text('Exposure Offset')),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -431,7 +421,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     min: _minAvailableExposureOffset,
                     max: _maxAvailableExposureOffset,
                     label: _currentExposureOffset.toString(),
-                    onChanged: _minAvailableExposureOffset ==
+                    onChanged:
+                        _minAvailableExposureOffset ==
                             _maxAvailableExposureOffset
                         ? null
                         : setExposureOffset,
@@ -465,9 +456,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           color: Colors.grey.shade50,
           child: Column(
             children: <Widget>[
-              const Center(
-                child: Text('Focus Mode'),
-              ),
+              const Center(child: Text('Focus Mode')),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -510,7 +499,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         IconButton(
           icon: const Icon(Icons.camera_alt),
           color: Colors.blue,
-          onPressed: cameraController != null &&
+          onPressed:
+              cameraController != null &&
                   cameraController.value.isInitialized &&
                   !cameraController.value.isRecordingVideo
               ? onTakePictureButtonPressed
@@ -519,30 +509,34 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         IconButton(
           icon: const Icon(Icons.videocam),
           color: Colors.blue,
-          onPressed: cameraController != null &&
+          onPressed:
+              cameraController != null &&
                   cameraController.value.isInitialized &&
                   !cameraController.value.isRecordingVideo
               ? onVideoRecordButtonPressed
               : null,
         ),
         IconButton(
-          icon: cameraController != null &&
+          icon:
+              cameraController != null &&
                   cameraController.value.isRecordingPaused
               ? const Icon(Icons.play_arrow)
               : const Icon(Icons.pause),
           color: Colors.blue,
-          onPressed: cameraController != null &&
+          onPressed:
+              cameraController != null &&
                   cameraController.value.isInitialized &&
                   cameraController.value.isRecordingVideo
-              ? (cameraController.value.isRecordingPaused)
-                  ? onResumeButtonPressed
-                  : onPauseButtonPressed
+              ? cameraController.value.isRecordingPaused
+                    ? onResumeButtonPressed
+                    : onPauseButtonPressed
               : null,
         ),
         IconButton(
           icon: const Icon(Icons.stop),
           color: Colors.red,
-          onPressed: cameraController != null &&
+          onPressed:
+              cameraController != null &&
                   cameraController.value.isInitialized &&
                   cameraController.value.isRecordingVideo
               ? onStopButtonPressed
@@ -552,10 +546,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           icon: const Icon(Icons.pause_presentation),
           color:
               cameraController != null && cameraController.value.isPreviewPaused
-                  ? Colors.red
-                  : Colors.blue,
-          onPressed:
-              cameraController == null ? null : onPausePreviewButtonPressed,
+              ? Colors.red
+              : Colors.blue,
+          onPressed: cameraController == null
+              ? null
+              : onPausePreviewButtonPressed,
         ),
       ],
     );
@@ -563,7 +558,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   /// Display a row of toggle to select the camera (or a message if no camera is available).
   Widget _cameraTogglesRowWidget() {
-    final List<Widget> toggles = <Widget>[];
+    final toggles = <Widget>[];
 
     void onChanged(CameraDescription? description) {
       if (description == null) {
@@ -585,23 +580,31 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             width: 90.0,
             child: RadioListTile<CameraDescription>(
               title: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
-              groupValue: controller?.description,
               value: cameraDescription,
-              onChanged: onChanged,
             ),
           ),
         );
       }
     }
 
-    return Row(children: toggles);
+    return Expanded(
+      child: SizedBox(
+        height: 56.0,
+        child: RadioGroup<CameraDescription>(
+          groupValue: controller?.description,
+          onChanged: onChanged,
+          child: ListView(scrollDirection: Axis.horizontal, children: toggles),
+        ),
+      ),
+    );
   }
 
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void onViewFinderTap(TapDownDetails details, BoxConstraints constraints) {
@@ -611,7 +614,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
     final CameraController cameraController = controller!;
 
-    final Offset offset = Offset(
+    final offset = Offset(
       details.localPosition.dx / constraints.maxWidth,
       details.localPosition.dy / constraints.maxHeight,
     );
@@ -628,8 +631,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> _initializeCameraController(
-      CameraDescription cameraDescription) async {
-    final CameraController cameraController = CameraController(
+    CameraDescription cameraDescription,
+  ) async {
+    final cameraController = CameraController(
       cameraDescription,
       kIsWeb ? ResolutionPreset.max : ResolutionPreset.medium,
       enableAudio: enableAudio,
@@ -645,7 +649,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       }
       if (cameraController.value.hasError) {
         showInSnackBar(
-            'Camera error ${cameraController.value.errorDescription}');
+          'Camera error ${cameraController.value.errorDescription}',
+        );
       }
     });
 
@@ -656,18 +661,19 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         ...!kIsWeb
             ? <Future<Object?>>[
                 cameraController.getMinExposureOffset().then(
-                    (double value) => _minAvailableExposureOffset = value),
-                cameraController
-                    .getMaxExposureOffset()
-                    .then((double value) => _maxAvailableExposureOffset = value)
+                  (double value) => _minAvailableExposureOffset = value,
+                ),
+                cameraController.getMaxExposureOffset().then(
+                  (double value) => _maxAvailableExposureOffset = value,
+                ),
               ]
             : <Future<Object?>>[],
-        cameraController
-            .getMaxZoomLevel()
-            .then((double value) => _maxAvailableZoom = value),
-        cameraController
-            .getMinZoomLevel()
-            .then((double value) => _minAvailableZoom = value),
+        cameraController.getMaxZoomLevel().then(
+          (double value) => _maxAvailableZoom = value,
+        ),
+        cameraController.getMinZoomLevel().then(
+          (double value) => _minAvailableZoom = value,
+        ),
       ]);
     } on CameraException catch (e) {
       switch (e.code) {
@@ -689,7 +695,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           showInSnackBar('Audio access is restricted.');
         default:
           _showCameraException(e);
-          break;
       }
     }
 
@@ -760,7 +765,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         } else {
           await cameraController.lockCaptureOrientation();
           showInSnackBar(
-              'Capture orientation locked to ${cameraController.value.lockedCaptureOrientation.toString().split('.').last}');
+            'Capture orientation locked to ${cameraController.value.lockedCaptureOrientation.toString().split('.').last}',
+          );
         }
       }
     } on CameraException catch (e) {
@@ -979,7 +985,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return;
     }
 
-    final VideoPlayerController vController = kIsWeb
+    final vController = kIsWeb
         ? VideoPlayerController.networkUrl(Uri.parse(videoFile!.path))
         : VideoPlayerController.file(File(videoFile!.path));
 
@@ -1039,12 +1045,13 @@ class CameraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CameraExampleHome(),
-    );
+    return const MaterialApp(home: CameraExampleHome());
   }
 }
 
+/// Getting available cameras for testing.
+@visibleForTesting
+List<CameraDescription> get cameras => _cameras;
 List<CameraDescription> _cameras = <CameraDescription>[];
 
 Future<void> main() async {

@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,11 +13,8 @@ import 'dart:js_interop';
 import 'package:google_maps/google_maps.dart' as gmaps;
 
 /// A typedef representing a callback function for handling cluster tap events.
-typedef ClusterClickHandler = void Function(
-  gmaps.MapMouseEvent,
-  MarkerClustererCluster,
-  gmaps.GMap,
-);
+typedef ClusterClickHandler =
+    void Function(gmaps.MapMouseEvent, MarkerClustererCluster, gmaps.Map);
 
 /// The [MarkerClustererOptions] object used to initialize [MarkerClusterer].
 ///
@@ -27,19 +24,22 @@ typedef ClusterClickHandler = void Function(
 extension type MarkerClustererOptions._(JSObject _) implements JSObject {
   /// Constructs a new [MarkerClustererOptions] object.
   factory MarkerClustererOptions({
-    gmaps.GMap? map,
+    gmaps.Map? map,
     List<gmaps.Marker>? markers,
     ClusterClickHandler? onClusterClick,
-  }) =>
-      MarkerClustererOptions._js(
-        map: map as JSAny?,
-        markers: markers?.cast<JSAny>().toJS ?? JSArray<JSAny>(),
-        onClusterClick: onClusterClick != null
-            ? ((JSAny event, MarkerClustererCluster cluster, JSAny map) =>
-                onClusterClick(event as gmaps.MapMouseEvent, cluster,
-                    map as gmaps.GMap)).toJS
-            : null,
-      );
+  }) => MarkerClustererOptions._js(
+    map: map as JSAny?,
+    markers: markers?.cast<JSAny>().toJS ?? JSArray<JSAny>(),
+    onClusterClick: onClusterClick != null
+        ? ((JSAny event, MarkerClustererCluster cluster, JSAny map) =>
+                  onClusterClick(
+                    event as gmaps.MapMouseEvent,
+                    cluster,
+                    map as gmaps.Map,
+                  ))
+              .toJS
+        : null,
+  );
 
   external factory MarkerClustererOptions._js({
     JSAny? map,
@@ -47,8 +47,8 @@ extension type MarkerClustererOptions._(JSObject _) implements JSObject {
     JSFunction? onClusterClick,
   });
 
-  /// Returns the [gmaps.GMap] object.
-  gmaps.GMap? get map => _map as gmaps.GMap?;
+  /// Returns the [gmaps.Map] object.
+  gmaps.Map? get map => _map as gmaps.Map?;
   @JS('map')
   external JSAny? get _map;
 
@@ -152,11 +152,13 @@ extension type MarkerClusterer._(JSObject _) implements JSObject {
   external void render();
 }
 
-/// Creates [MarkerClusterer] object with given [gmaps.GMap] and
+/// Creates [MarkerClusterer] object with given [gmaps.Map] and
 /// [ClusterClickHandler].
 MarkerClusterer createMarkerClusterer(
-    gmaps.GMap map, ClusterClickHandler onClusterClickHandler) {
-  final MarkerClustererOptions options = MarkerClustererOptions(
+  gmaps.Map map,
+  ClusterClickHandler onClusterClickHandler,
+) {
+  final options = MarkerClustererOptions(
     map: map,
     onClusterClick: onClusterClickHandler,
   );

@@ -8,7 +8,7 @@ local development.
 Set up:
 
 ```sh
-cd script/tool && dart pub get && cd ../../
+dart pub get -C script/tool
 ```
 
 Run:
@@ -47,11 +47,26 @@ anywhere within a package).
 dart run script/tool/bin/flutter_plugin_tools.dart format --packages package_name
 ```
 
-### Run the Dart Static Analyzer
+The `flutter/packages` repository uses clang version `15.0.0` . Newer versions of clang may format code differently.
+
+### Run the Static Analysis
+
+To analyze only Dart code:
 
 ```sh
 dart run script/tool/bin/flutter_plugin_tools.dart analyze --packages package_name
 ```
+
+To include native code, include the relevant platform flag(s). For example:
+
+```sh
+# Analyze Dart and Android Java/Kotlin code:
+dart run script/tool/bin/flutter_plugin_tools.dart analyze --android --packages package_name
+# Analyze Dart and iOS+macOS Objective-C/Swift code:
+dart run script/tool/bin/flutter_plugin_tools.dart analyze --ios --macos --packages package_name
+```
+
+Dart analysis can be excluded with `--no-dart`.
 
 ### Run Dart Unit Tests
 

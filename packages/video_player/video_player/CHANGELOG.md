@@ -1,3 +1,42 @@
+## NEXT
+
+* Updates minimum supported SDK version to Flutter 3.32/Dart 3.8.
+* Updates README to reflect currently supported OS versions for the latest
+  versions of the endorsed platform implementations.
+  * Applications built with older versions of Flutter will continue to
+    use compatible versions of the platform implementations.
+
+## 2.10.1
+
+* Fixes a bug where the `VideoPlayer` widget and `VideoProgressIndicator` widget would stop updating after GlobalKey reparenting.
+* Updates the `VideoProgressIndicator` widget to handle zero-duration videos.
+* Updates minimum supported SDK version to Flutter 3.29/Dart 3.7.
+
+## 2.10.0
+
+* Adds support for platform views as an optional way of displaying a video on Android and iOS.
+* Updates README to indicate that Andoid SDK <21 is no longer supported.
+* Updates minimum supported SDK version to Flutter 3.27/Dart 3.6.
+
+## 2.9.5
+
+* Fixes layout issue caused by `Transform.rotate` not affecting space calculation.
+
+## 2.9.4
+
+* Reduces the position update interval from 500ms to 100ms.
+
+## 2.9.3
+
+* Updates minimum supported SDK version to Flutter 3.22/Dart 3.4.
+* Fixes mechanism to detect identifier in multi-line WebVTT captions.
+
+## 2.9.2
+
+* Updates minimum supported SDK version to Flutter 3.19/Dart 3.3.
+* Throws a more descriptive `StateError` in the case where 
+  `VideoPlayerController.initialize` receives more than one `initialized` event.
+
 ## 2.9.1
 
 * Updates minimum web implementation version to ensure support for

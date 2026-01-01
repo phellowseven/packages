@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,5 +24,17 @@ class AdsManagerProxyApi(override val pigeonRegistrar: ProxyApiRegistrar) :
 
   override fun start(pigeon_instance: AdsManager) {
     pigeon_instance.start()
+  }
+
+  override fun adCuePoints(pigeon_instance: AdsManager): List<Double> {
+    return pigeon_instance.adCuePoints.map { it.toDouble() }
+  }
+
+  override fun resume(pigeon_instance: AdsManager) {
+    pigeon_instance.resume()
+  }
+
+  override fun skip(pigeon_instance: AdsManager) {
+    pigeon_instance.skip()
   }
 }
