@@ -6,8 +6,8 @@ version: 3.0.0-phellowseven.1
 publish_to: none  # Custom fork - not published to pub.dev
 
 environment:
-  sdk: ^3.9.0
-  flutter: ">=3.35.0"
+  sdk: ^3.10.0
+  flutter: ">=3.38.1"
 
 flutter:
   plugin:
